@@ -1,0 +1,5 @@
+primary := literal
+| identifier 
+| anonymous_function 
+| anonymous_struct
+

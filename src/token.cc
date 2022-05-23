@@ -1,4 +1,4 @@
-#include "token.hh"
+#include "../include/token.hh"
 #include <string>
 #include <map>
 
