@@ -32,6 +32,7 @@ namespace ast
    public:
       BinaryExp(operators::Operator op, Exp *left, Exp *right) : left(left), right(right), op(op){};
       ExpType get_type() override { return ExpType::EXP_BINARY; };
+      std::string to_string() override {return "{"+ operators::operator_to_string(op)+ left->to_string() + ", "+right->to_string()+"}";};
       Exp *left, *right;
       operators::Operator op;
    };
@@ -41,6 +42,7 @@ namespace ast
    public:
       UnaryExp(operators::Operator op, Exp *exp) : exp(exp), op(op){};
       ExpType get_type() override { return ExpType::EXP_UNARY; };
+      std::string to_string() override {return "{"+ operators::operator_to_string(op)+ exp->to_string() + "}";};
       Exp *exp;
       operators::Operator op;
    };
@@ -50,6 +52,7 @@ namespace ast
    public:
       TernaryExp(Exp *cond, Exp *left, Exp *right) : cond(cond), left(left), right(right){};
       ExpType get_type() override { return ExpType::EXP_TERNARY; };
+      std::string to_string() override {return "{" + cond->to_string() + "?" + left->to_string() + ":"+right->to_string();};
       Exp *cond, *right, *left;
    };
 
@@ -58,6 +61,7 @@ namespace ast
    public:
       MemberAccessExp(Exp *exp, std::string member) : exp(exp), member(member){};
       ExpType get_type() override { return ExpType::EXP_MEMBER_ACCESS; };
+      std::string to_string() override {return exp->to_string() + "."+member;};
       Exp *exp;
       std::string member;
    };
@@ -67,15 +71,34 @@ namespace ast
       public:
       FunctionCallExp(Exp *func, std::vector<Exp*> args) : func(func), args(args){};
       ExpType get_type() override { return ExpType::EXP_FUNCTION_CALL; };
+      std::string to_string() override {
+         std::string ret;
+         ret += func->to_string() + "(";
+         for(const auto& arg : args){
+            ret+= arg->to_string() + ", ";
+         }
+         ret = ret.substr(0, ret.size()-2);
+         ret += ")";
+         return ret;
+      };
+
       Exp *func;
       std::vector<Exp *> args;
    };
 
+   enum LiteralType{
+      NUM_LITERAL,
+      STR_LITERAL,
+      CHAR_LITERAL,
+      FN_LITERAL
+   };
    class LiteralExp : public Exp
    {
       public:
-      LiteralExp(std::string val):val(val){};
+      LiteralExp(LiteralType type, std::string val): type(type), val(val){};
       ExpType get_type() override { return ExpType::EXP_LITERAL; };
+      std::string to_string() override {return val;};
+      LiteralType type;
       std::string val;
    };
 
@@ -83,6 +106,8 @@ namespace ast
    {
       public:
       InvalidExp(){};
+      std::string to_string() override {return "bad exp";};
+
       ExpType get_type() override { return ExpType::EXP_INVALID; };
    };
 }

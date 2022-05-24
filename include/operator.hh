@@ -192,6 +192,58 @@ namespace operators
          return OPERATOR_INVALID;
       }
    }
+
+   std::string operator_to_string(Operator op){
+      switch(op){
+      case OPERATOR_INVALID:return"invalid_op";
+      case OPERATOR_ADD:return"+";
+      case OPERATOR_SUB:return"-";
+      case OPERATOR_MUL:return"*";
+      case OPERATOR_STAR:return"*";
+      case OPERATOR_DIV:return"/";
+      case OPERATOR_MOD:return"%";
+      case OPERATOR_INC:return"++";
+      case OPERATOR_DEC:return"--";
+      case OPERATOR_AND:return"&";
+      case OPERATOR_AMP:return"&";
+      case OPERATOR_OR:return"|";
+      case OPERATOR_XOR:return"^";
+      case OPERATOR_SHR:return">>";
+      case OPERATOR_SHL:return"<<";
+      case OPERATOR_NEG:return" ~";
+      case OPERATOR_LAND:return"&&";
+      case OPERATOR_LOR:return"||";
+      case OPERATOR_NOT:return"!";
+      case OPERATOR_ASSIGN:return"=";
+      case OPERATOR_ADD_ASSIGN:return"+=";
+      case OPERATOR_SUB_ASSIGN:return"-=";
+      case OPERATOR_MUL_ASSIGN:return"*=";
+      case OPERATOR_DIV_ASSIGN:return"/=";
+      case OPERATOR_MOD_ASSIGN:return"%=";
+      case OPERATOR_AND_ASSIGN:return"&=";
+      case OPERATOR_OR_ASSIGN:return"|=";
+      case OPERATOR_XOR_ASSIGN:return"^=";
+      case OPERATOR_SHR_ASSIGN:return">>=";
+      case OPERATOR_SHL_ASSIGN:return"<<=";
+      case OPERATOR_NEG_ASSIGN:return"~=";
+      case OPERATOR_EQL:return"==";
+      case OPERATOR_NEQL:return"!=";
+      case OPERATOR_GTR:return">";
+      case OPERATOR_LSS:return"<";
+      case OPERATOR_GEQ:return">=";
+      case OPERATOR_LEQ:return"<=";
+      case OPERATOR_PIPE:return"|>";
+      case OPERATOR_DOT:return".";
+      case OPERATOR_COLON:return":";
+      case OPERATOR_LPARENTESIS:return"(";
+      case OPERATOR_LBRACKET:return"[";
+      case OPERATOR_RPARENTESIS:return")";
+      case OPERATOR_RBRACKET:return"]";
+      case OPERATOR_TERNARY:return"?";
+      case OPERATOR_AT:return"@";
+      default:return "invalid_operator";
+      }
+   }
 }
 
 #endif

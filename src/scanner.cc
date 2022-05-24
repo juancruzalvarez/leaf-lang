@@ -226,7 +226,7 @@ namespace scanner
          case '\\':
             return token::LAMBDA;
          case '?':
-            return token::UNARY;
+            return token::TERNARY;
 
          // group first, first first, first =
          case ':':

@@ -83,6 +83,15 @@ namespace
 using namespace token;
 namespace parser{
    
+   void init(Parser &pars, const char* file_path){
+      scanner::init(pars.scn, file_path);
+      pars.errors = {};
+   }
+   void clean_up(Parser &pars){
+      scanner::clean_up(pars.scn);
+      pars.errors = {};
+   }
+
 
    ast::Exp* parse_expression(Parser &pars){
       return parse_assignment(pars);
@@ -98,7 +107,7 @@ namespace parser{
    }
 
    ast::Exp* parse_ternary(Parser &pars){
-      ast::Exp* exp = parser_binary(pars, 0);
+      ast::Exp* exp = parse_binary(pars, 0);
       Token tok;
       if (match(pars, TERNARY, tok)) {
          ast::Exp* true_branch = parse_ternary(pars);
@@ -111,7 +120,7 @@ namespace parser{
       return exp;
    }
 
-   ast::Exp* parser_binary(Parser &pars, int min_precedence){
+   ast::Exp* parse_binary(Parser &pars, int min_precedence){
       ast::Exp* exp = parse_unary(pars);
       Token op;
       while(match(pars, {LOR, LAND, AMP, OR, XOR, EQL, NEQL,GTR, GEQ, LSS, LEQ, SHR, SHL,ADD, SUB,STAR, DIV, MOD}, op)){
@@ -120,7 +129,7 @@ namespace parser{
             break;
          }
          int next_min_precedence = op_info.r_associative ? op_info.precedence : op_info.precedence+1;
-         ast::Exp* rhs = parser_binary(pars, next_min_precedence);
+         ast::Exp* rhs = parse_binary(pars, next_min_precedence);
          exp = new ast::BinaryExp(operators::get_binary_operator(op.type), exp, rhs);
       }
       return exp;
@@ -203,7 +212,7 @@ namespace parser{
       if (match(pars, { NOT, SUB, INC, DEC, NEG, STAR, AMP}, tok)) {
          ast::Exp* exp = parse_unary(pars);
          if (tok.type == DEC || tok.type == INC) {
-            return new ast::BinaryExp{tok.type == INC ? operators::OPERATOR_ADD_ASSIGN : operators::OPERATOR_SUB_ASSIGN, exp, new ast::LiteralExp{"1"}};
+            return new ast::BinaryExp{tok.type == INC ? operators::OPERATOR_ADD_ASSIGN : operators::OPERATOR_SUB_ASSIGN, exp, new ast::LiteralExp{ast::NUM_LITERAL, "1"}};
          } else {
             return new ast::UnaryExp{operators::get_unary_operator(tok.type), exp};
          }
@@ -248,7 +257,21 @@ namespace parser{
       return exp;
    }
 
-   ast::Exp* parse_primary(Parser &pars);
+   ast::Exp* parse_primary(Parser &pars){
+      token::Token tok = advance(pars);
+      switch(tok.type){
+         case NUM_LITERAL : return new ast::LiteralExp(ast::NUM_LITERAL,  tok.val);
+         case CHAR_LITERAL: return new ast::LiteralExp(ast::CHAR_LITERAL, tok.val);
+         case STR_LITERAL: return new ast::LiteralExp(ast::STR_LITERAL, tok.val);
+         case FN: {
+            return new ast::InvalidExp{};
+         }
+         default: {
+            pars.errors.push_back({error::PARSER_ERROR, tok.pos, "Invalid literal value."});
+            return new ast::InvalidExp{};
+         }
+      }
+   }
 
    template<typename T>
    std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser&)> parse_func){
