@@ -1,6 +1,6 @@
 #ifndef OPERATOR_H
 #define OPERATOR_H
-
+#include "token.hh"
 namespace operators
 {
 
@@ -10,11 +10,13 @@ namespace operators
       OPERATOR_ADD,         // +
       OPERATOR_SUB,         // -
       OPERATOR_MUL,         // *
+      OPERATOR_STAR,        // *
       OPERATOR_DIV,         // /
       OPERATOR_MOD,         // %
       OPERATOR_INC,         // ++
       OPERATOR_DEC,         // --
       OPERATOR_AND,         // &
+      OPERATOR_AMP,         // &
       OPERATOR_OR,          // |
       OPERATOR_XOR,         // ^
       OPERATOR_SHR,         // >>
@@ -59,65 +61,137 @@ namespace operators
       bool r_associative;
    };
   
-   OperatorInfo get_operator_info(Operator op)
+   OperatorInfo get_operator_info(token::TokenType op)
    {
       switch (op)
       {
-      case OPERATOR_DOT:
-      case OPERATOR_LPARENTESIS:
-      case OPERATOR_LBRACKET:
-      case OPERATOR_INC:
-      case OPERATOR_DEC:
-         return {10, false};
-      case OPERATOR_NOT:
-      case OPERATOR_NEG:
-         return {10, true};
-      case OPERATOR_MUL:
-      case OPERATOR_DIV:
-      case OPERATOR_MOD:
-      case OPERATOR_SHL:
-      case OPERATOR_SHR:
+      case token::STAR:
+      case token::DIV:
+      case token::MOD:
+      case token::SHL:
+      case token::SHR:
          return {9, false};
-      case OPERATOR_ADD:
-      case OPERATOR_SUB:
+
+      case token::ADD:
+      case token::SUB:
          return {8, false};
-      case OPERATOR_GTR:
-      case OPERATOR_LSS:
-      case OPERATOR_GEQ:
-      case OPERATOR_LEQ:
+
+      case token::GTR:
+      case token::LSS:
+      case token::GEQ:
+      case token::LEQ:
          return {7, true};
-      case OPERATOR_EQL:
-      case OPERATOR_NEQL:
+
+      case token::EQL:
+      case token::NEQL:
          return {6, true};
-      case OPERATOR_AND:
+
+      case token::AMP:
          return {5, true};
-      case OPERATOR_XOR:
+
+      case token::XOR:
          return {4, true};
-      case OPERATOR_OR:
+
+      case token::OR:
          return {3, true};
-      case OPERATOR_LAND:
+
+      case token::LAND:
          return {2, true};
-      case OPERATOR_LOR:
-         return {1, true};
-      case OPERATOR_TERNARY:
-      case OPERATOR_ASSIGN:
-      case OPERATOR_ADD_ASSIGN:
-      case OPERATOR_AND_ASSIGN:
-      case OPERATOR_SUB_ASSIGN:
-      case OPERATOR_DIV_ASSIGN:
-      case OPERATOR_MOD_ASSIGN:
-      case OPERATOR_MUL_ASSIGN:
-      case OPERATOR_NEG_ASSIGN:
-      case OPERATOR_OR_ASSIGN:
-      case OPERATOR_SHL_ASSIGN:
-      case OPERATOR_SHR_ASSIGN:
-      case OPERATOR_XOR_ASSIGN:
-         return {0, false};
+
+      case token::LOR:
+         return { 1, true};
+
       default:
          return {-1, false};
       }
    }
 
+   Operator get_unary_operator(token::TokenType op){
+      switch(op){
+         case token::NOT:
+            return OPERATOR_NOT;
+         case token::SUB:
+            return OPERATOR_SUB;
+         case token::INC:
+            return OPERATOR_INC;
+         case token::DEC:
+            return OPERATOR_DEC;
+         case token::NEG:
+            return OPERATOR_NEG;
+         case token::STAR:
+            return OPERATOR_STAR;
+         case token::AMP:
+            return OPERATOR_AMP;
+         default:
+            return OPERATOR_INVALID;
+      }
+   }
+
+   Operator get_binary_operator(token::TokenType op){
+      switch (op)
+      {
+      case token::ASSIGN:
+         return OPERATOR_ASSIGN;
+      case token::SUB_ASSIGN:
+         return OPERATOR_SUB_ASSIGN;
+      case token::MUL_ASSIGN:
+         return OPERATOR_MUL_ASSIGN;
+      case token::DIV_ASSIGN:
+         return OPERATOR_DIV_ASSIGN;
+      case token::MOD_ASSIGN:
+         return OPERATOR_MOD_ASSIGN;
+      case token::AND_ASSIGN:
+         return OPERATOR_AND_ASSIGN;
+      case token::OR_ASSIGN:
+         return OPERATOR_OR_ASSIGN;
+      case token::XOR_ASSIGN:
+         return OPERATOR_XOR_ASSIGN;
+      case token::SHR_ASSIGN:
+         return OPERATOR_SHR_ASSIGN;
+      case token::SHL_ASSIGN:
+         return OPERATOR_SHL_ASSIGN;
+      case token::NEG_ASSIGN:
+         return OPERATOR_NEG_ASSIGN;
+      case token::STAR:
+         return OPERATOR_MUL;
+      case token::DIV:
+         return OPERATOR_DIV;
+      case token::MOD:
+         return OPERATOR_MOD;
+      case token::SHL:
+         return OPERATOR_SHL;
+      case token::SHR:
+         return OPERATOR_SHR;
+      case token::ADD:
+         return OPERATOR_ADD;
+      case token::SUB:
+         return OPERATOR_SUB;
+      case token::GTR:
+         return OPERATOR_GTR;
+      case token::LSS:
+         return OPERATOR_LSS;
+      case token::GEQ:
+         return OPERATOR_LEQ;
+      case token::LEQ:
+         return OPERATOR_LEQ;
+      case token::EQL:
+         return OPERATOR_EQL;
+      case token::NEQL:
+         return OPERATOR_NEQL;
+      case token::AMP:
+         return OPERATOR_AND;
+      case token::XOR:
+         return OPERATOR_XOR;
+      case token::OR:
+         return OPERATOR_OR;
+      case token::LAND:
+         return OPERATOR_LAND;
+      case token::LOR:
+         return OPERATOR_LOR;
+      default:
+         return OPERATOR_INVALID;
+      }
+   }
 }
 
 #endif
