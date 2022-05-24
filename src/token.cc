@@ -153,6 +153,8 @@ namespace token
          return "}";
       case AT:
          return "@";
+      case TERNARY:
+         return "?";
       default:
          return "unknown_type";
       }

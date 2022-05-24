@@ -2,7 +2,7 @@
 #define EXPRESSION_H
 #include <string>
 #include <vector>
-#include "operator.hh"
+
 
 namespace ast
 {
@@ -29,25 +29,25 @@ namespace ast
    class BinaryExp : public Exp
    {
    public:
-      BinaryExp(Exp *left, Exp *right, operators::Operator op) : left(left), right(right), op(op){};
+      BinaryExp(token::TokenType op, Exp *left, Exp *right) : left(left), right(right), op(op){};
       ExpType get_type() override { return ExpType::EXP_BINARY; };
       Exp *left, *right;
-      operators::Operator op;
+      token::TokenType op;
    };
 
    class UnaryExp : public Exp
    {
    public:
-      UnaryExp(Exp *exp, operators::Operator op) : exp(exp), op(op){};
+      UnaryExp(token::TokenType op, Exp *exp) : exp(exp), op(op){};
       ExpType get_type() override { return ExpType::EXP_UNARY; };
       Exp *exp;
-      operators::Operator op;
+       token::TokenType op;
    };
 
    class TernaryExp : public Exp
    {
    public:
-      TernaryExp(Exp *cond, Exp *left, Exp *right, operators::Operator op) : cond(cond), left(left), right(right){};
+      TernaryExp(Exp *cond, Exp *left, Exp *right) : cond(cond), left(left), right(right){};
       ExpType get_type() override { return ExpType::EXP_TERNARY; };
       Exp *cond, *right, *left;
    };
@@ -76,6 +76,13 @@ namespace ast
       LiteralExp(std::string val):val(val){};
       ExpType get_type() override { return ExpType::EXP_LITERAL; };
       std::string val;
+   };
+
+   class InvalidExp : public Exp
+   {
+      public:
+      InvalidExp(){};
+      ExpType get_type() override { return ExpType::EXP_INVALID; };
    };
 }
 #endif
