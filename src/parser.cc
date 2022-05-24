@@ -2,6 +2,7 @@
 #include "../include/parser.hh"
 #include "../include/expression.hh"
 #include "../include/scanner.hh"
+#include "../include/operator.hh"
 
 namespace
 {
@@ -49,7 +50,7 @@ namespace
       if (peek(pars).type == type)
          advance(pars);
    }
-   // if next token matches, advance it and store it in @tok and return true,
+   // if next token matches, advance it, store it in @tok and return true,
    // else return false.
    bool match(parser::Parser &pars, token::TokenType type, token::Token &tok)
    {
@@ -91,13 +92,13 @@ namespace parser{
       ast::Exp *lhs = parse_ternary(pars);
       Token tok;
       if(match(pars, {ASSIGN, ADD_ASSIGN, OR_ASSIGN, AND_ASSIGN, SUB_ASSIGN, XOR_ASSIGN, MOD_ASSIGN}, tok)){
-         lhs = new ast::BinaryExp{tok.type, lhs, parse_assignment(pars)};
+         lhs = new ast::BinaryExp{operators::get_binary_operator(tok.type), lhs, parse_assignment(pars)};
       }
       return lhs;
    }
 
    ast::Exp* parse_ternary(Parser &pars){
-      ast::Exp* exp = parse_lor(pars);
+      ast::Exp* exp = parser_binary(pars, 0);
       Token tok;
       if (match(pars, TERNARY, tok)) {
          ast::Exp* true_branch = parse_ternary(pars);
@@ -110,6 +111,21 @@ namespace parser{
       return exp;
    }
 
+   ast::Exp* parser_binary(Parser &pars, int min_precedence){
+      ast::Exp* exp = parse_unary(pars);
+      Token op;
+      while(match(pars, {LOR, LAND, AMP, OR, XOR, EQL, NEQL,GTR, GEQ, LSS, LEQ, SHR, SHL,ADD, SUB,STAR, DIV, MOD}, op)){
+         operators::OperatorInfo op_info = operators::get_operator_info(op.type);
+         if(op_info.precedence < min_precedence){
+            break;
+         }
+         int next_min_precedence = op_info.r_associative ? op_info.precedence : op_info.precedence+1;
+         ast::Exp* rhs = parser_binary(pars, next_min_precedence);
+         exp = new ast::BinaryExp(operators::get_binary_operator(op.type), exp, rhs);
+      }
+      return exp;
+   }
+/*
    ast::Exp* parse_lor(Parser &pars){
       ast::Exp* exp = parse_land(pars);
       Token tok;
@@ -181,15 +197,15 @@ namespace parser{
       }
       return exp;
    }
-
+*/
    ast::Exp* parse_unary(Parser &pars){
       Token tok;
-      if (match(pars, { NOT, SUB, INC, DEC, NEG}, tok)) {
+      if (match(pars, { NOT, SUB, INC, DEC, NEG, STAR, AMP}, tok)) {
          ast::Exp* exp = parse_unary(pars);
          if (tok.type == DEC || tok.type == INC) {
-            return new ast::BinaryExp{tok.type == INC ? ADD_ASSIGN : SUB_ASSIGN, exp, new ast::LiteralExp{"1"}};
+            return new ast::BinaryExp{tok.type == INC ? operators::OPERATOR_ADD_ASSIGN : operators::OPERATOR_SUB_ASSIGN, exp, new ast::LiteralExp{"1"}};
          } else {
-            return new ast::UnaryExp{tok.type, exp};
+            return new ast::UnaryExp{operators::get_unary_operator(tok.type), exp};
          }
       }
       return parse_call_or_access(pars);
@@ -222,7 +238,16 @@ namespace parser{
       }
       return exp;
    }
-   ast::Exp* parse_post_inc(Parser &pars);
+
+   ast::Exp* parse_post_inc(Parser &pars){
+      ast::Exp* exp = parse_primary(pars);
+      Token tok;
+      if (match(pars,{INC, DEC}, tok)) {
+         exp = new ast::UnaryExp{operators::get_unary_operator(tok.type), exp};
+      }
+      return exp;
+   }
+
    ast::Exp* parse_primary(Parser &pars);
 
    template<typename T>

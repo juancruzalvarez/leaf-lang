@@ -2,6 +2,7 @@
 #define EXPRESSION_H
 #include <string>
 #include <vector>
+#include "operator.hh"
 
 
 namespace ast
@@ -29,19 +30,19 @@ namespace ast
    class BinaryExp : public Exp
    {
    public:
-      BinaryExp(token::TokenType op, Exp *left, Exp *right) : left(left), right(right), op(op){};
+      BinaryExp(operators::Operator op, Exp *left, Exp *right) : left(left), right(right), op(op){};
       ExpType get_type() override { return ExpType::EXP_BINARY; };
       Exp *left, *right;
-      token::TokenType op;
+      operators::Operator op;
    };
 
    class UnaryExp : public Exp
    {
    public:
-      UnaryExp(token::TokenType op, Exp *exp) : exp(exp), op(op){};
+      UnaryExp(operators::Operator op, Exp *exp) : exp(exp), op(op){};
       ExpType get_type() override { return ExpType::EXP_UNARY; };
       Exp *exp;
-       token::TokenType op;
+      operators::Operator op;
    };
 
    class TernaryExp : public Exp
