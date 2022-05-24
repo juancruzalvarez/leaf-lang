@@ -4,13 +4,14 @@
 #include <list>
 #include <fstream>
 #include "token.hh"
+#include "position.hh"
 namespace scanner
 {
 
    struct Scanner
    {
       std::fstream file;
-      token::Position current_position;
+      Position current_position;
       std::list<token::Token> token_buffer;
    };
 

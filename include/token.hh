@@ -1,6 +1,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 #include <string>
+#include "position.hh"
 namespace token
 {
 
@@ -84,12 +85,7 @@ namespace token
       AT           // @
    };
 
-   struct Position
-   {
-      std::string file_name;
-      int line, line_offset;
-   };
-
+  
    struct Token
    {
       Position pos;
