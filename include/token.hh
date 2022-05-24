@@ -81,7 +81,7 @@ namespace token
       RPARENTESIS, // )
       RBRACKET,    // ]
       RBRACE,      // }
-      UNARY,       // ?
+      TERNARY,       // ?
       AT           // @
    };
 
