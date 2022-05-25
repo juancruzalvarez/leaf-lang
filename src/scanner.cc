@@ -142,7 +142,12 @@ namespace scanner
             if (peek_char(scn) == 'e' || peek_char(scn) == 'E')
             {
                get_char(scn); // advance 'e' or 'E'
-               exponent = read_while(scn, cond);
+               char exp_sig = '+';
+               if (peek_char(scn) == '+' || peek_char(scn) == '-')
+                  exp_sig = get_char(scn);
+
+               exponent = exp_sig + read_while(scn, cond);
+
                has_exponent = true;
             }
          }

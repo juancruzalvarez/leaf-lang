@@ -23,8 +23,8 @@ namespace ast
    class Exp
    {
    public:
-      virtual ExpType get_type();
-      virtual std::string to_string();
+      virtual ExpType get_type(){return ExpType::EXP_INVALID;};
+      virtual std::string to_string(){return "invalid_expression";};
    };
 
    class BinaryExp : public Exp
@@ -32,7 +32,7 @@ namespace ast
    public:
       BinaryExp(operators::Operator op, Exp *left, Exp *right) : left(left), right(right), op(op){};
       ExpType get_type() override { return ExpType::EXP_BINARY; };
-      std::string to_string() override {return "{"+ operators::operator_to_string(op)+ left->to_string() + ", "+right->to_string()+"}";};
+      std::string to_string() override {return "{ "+ operators::operator_to_string(op)+" "+ left->to_string() + ", "+right->to_string()+"}";};
       Exp *left, *right;
       operators::Operator op;
    };
@@ -42,7 +42,7 @@ namespace ast
    public:
       UnaryExp(operators::Operator op, Exp *exp) : exp(exp), op(op){};
       ExpType get_type() override { return ExpType::EXP_UNARY; };
-      std::string to_string() override {return "{"+ operators::operator_to_string(op)+ exp->to_string() + "}";};
+      std::string to_string() override {return "{ "+ operators::operator_to_string(op)+" "+ exp->to_string() + "}";};
       Exp *exp;
       operators::Operator op;
    };
@@ -87,10 +87,11 @@ namespace ast
    };
 
    enum LiteralType{
-      NUM_LITERAL,
-      STR_LITERAL,
-      CHAR_LITERAL,
-      FN_LITERAL
+      LIT_IDENTIFIER,
+      LIT_NUM,
+      LIT_STR,
+      LIT_CHAR,
+      LIT_FN
    };
    class LiteralExp : public Exp
    {

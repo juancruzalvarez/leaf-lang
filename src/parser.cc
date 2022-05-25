@@ -1,8 +1,9 @@
 #include <vector>
+#include "../include/operator.hh"
 #include "../include/parser.hh"
 #include "../include/expression.hh"
 #include "../include/scanner.hh"
-#include "../include/operator.hh"
+
 
 namespace
 {
@@ -128,91 +129,19 @@ namespace parser{
          if(op_info.precedence < min_precedence){
             break;
          }
-         int next_min_precedence = op_info.r_associative ? op_info.precedence : op_info.precedence+1;
+         int next_min_precedence = op_info.r_associative ? op_info.precedence+1 : op_info.precedence;
          ast::Exp* rhs = parse_binary(pars, next_min_precedence);
          exp = new ast::BinaryExp(operators::get_binary_operator(op.type), exp, rhs);
       }
       return exp;
    }
-/*
-   ast::Exp* parse_lor(Parser &pars){
-      ast::Exp* exp = parse_land(pars);
-      Token tok;
-      while (match(pars, LOR, tok)) {
-        exp = new ast::BinaryExp{ LOR, exp, parse_land(pars) };
-      }
-      return exp;
-   }
 
-   ast::Exp* parse_land(Parser &pars){
-      ast::Exp* exp = parse_bitwise(pars);
-      Token tok;
-      while (match(pars, LAND, tok)) {
-        exp = new ast::BinaryExp{ LAND, exp, parse_bitwise(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_bitwise(Parser &pars){
-      ast::Exp* exp = parse_equality(pars);
-      Token tok;
-      while (match(pars, {AMP, OR, XOR}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_equality(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_equality(Parser &pars){
-      ast::Exp* exp = parse_comp(pars);
-      Token tok;
-      while (match(pars, {EQL, NEQL}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_comp(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_comp(Parser &pars){
-      ast::Exp* exp = parse_shift(pars);
-      Token tok;
-      while (match(pars, {GTR, GEQ, LSS, LEQ}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_shift(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_shift(Parser &pars){
-      ast::Exp* exp = parse_term(pars);
-      Token tok;
-      while (match(pars, {SHR, SHL}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_term(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_term(Parser &pars){
-      ast::Exp* exp = parse_factor(pars);
-      Token tok;
-      while (match(pars, {ADD, SUB}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_factor(pars) };
-      }
-      return exp;
-   }
-
-   ast::Exp* parse_factor(Parser &pars){
-      ast::Exp* exp = parse_unary(pars);
-      Token tok;
-      while (match(pars, {STAR, DIV, MOD}, tok)) {
-        exp = new ast::BinaryExp{ tok.type, exp, parse_unary(pars) };
-      }
-      return exp;
-   }
-*/
    ast::Exp* parse_unary(Parser &pars){
       Token tok;
       if (match(pars, { NOT, SUB, INC, DEC, NEG, STAR, AMP}, tok)) {
          ast::Exp* exp = parse_unary(pars);
          if (tok.type == DEC || tok.type == INC) {
-            return new ast::BinaryExp{tok.type == INC ? operators::OPERATOR_ADD_ASSIGN : operators::OPERATOR_SUB_ASSIGN, exp, new ast::LiteralExp{ast::NUM_LITERAL, "1"}};
+            return new ast::BinaryExp{tok.type == INC ? operators::OPERATOR_ADD_ASSIGN : operators::OPERATOR_SUB_ASSIGN, exp, new ast::LiteralExp{ast::LIT_NUM, "1"}};
          } else {
             return new ast::UnaryExp{operators::get_unary_operator(tok.type), exp};
          }
@@ -260,9 +189,15 @@ namespace parser{
    ast::Exp* parse_primary(Parser &pars){
       token::Token tok = advance(pars);
       switch(tok.type){
-         case NUM_LITERAL : return new ast::LiteralExp(ast::NUM_LITERAL,  tok.val);
-         case CHAR_LITERAL: return new ast::LiteralExp(ast::CHAR_LITERAL, tok.val);
-         case STR_LITERAL: return new ast::LiteralExp(ast::STR_LITERAL, tok.val);
+         case NUM_LITERAL : return new ast::LiteralExp(ast::LIT_NUM,  tok.val);
+         case CHAR_LITERAL: return new ast::LiteralExp(ast::LIT_CHAR, tok.val);
+         case STR_LITERAL: return new ast::LiteralExp(ast::LIT_STR, tok.val);
+         case IDENTIFIER: return new ast::LiteralExp(ast::LIT_IDENTIFIER, tok.val);
+         case LPARENTESIS:{
+            ast::Exp* exp = parse_expression(pars);
+            consume(pars, RPARENTESIS, "Unclosed parentesis expression.");
+            return exp;
+         }
          case FN: {
             return new ast::InvalidExp{};
          }
