@@ -37,9 +37,15 @@ type pair_condition_v2 :: fn (int, int) -> bool;
 //struct type
 
 type point_t :: struct{
-   distance_to_center :: float;
+   dist_to_center :: float;
    x, y :: int;
-};
+}
+
+fn (point :: &point_t) move(x, y :: int){
+   point.x+=x;
+   point.y+=y;
+}
+
 
 //default values
 
@@ -56,6 +62,11 @@ type uint32_t :: uint32;
 
 type typename :: type_value;
 
+
+sorted_multiples_of_2_plus_five = nums
+                                  |>sort(fn x, y => x.a>y.a ? 1 : -1)
+                                  |>filter(fn x => x%2 = 0)
+                                  |>map(fn x => x+5);
 //type union
 
 type signed_number :: int32 | int64;
@@ -74,17 +85,17 @@ type num_str_pair :: number string;
 
 //interfaces?
 
-type Iequals :: @T has{
+class Iequals :: T has{
    equals :: fn T, T -> bool;
    not_equals :: fn T, T -> bool;
 }
 
-type Icompare :: @T has{
+class IComparable :: T has{
    greaterThan :: fn T, T -> bool;
    lessThan :: fn T, T -> bool;
 }
 
-type List :: struct<T>{
+type List :: struct<T :: IComparable>{
    length :: int;
    data   :: *T;
 };
@@ -92,6 +103,9 @@ type List :: struct<T>{
 fn<T> push_back(l :: List<T>, x :: T){
 
 }
+
+list :: List<uint32>;
+push_back(list, 32);
 
 type Icomparable :: Iequals&Icompare;
 

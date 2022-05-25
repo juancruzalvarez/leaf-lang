@@ -14,6 +14,9 @@ namespace parser{
    };
 
    void init(Parser &pars, const char* file_path);
+   ast::Type* parse_type(Parser &pars);
+   
+
    ast::Exp* parse_expression(Parser &pars);
    ast::Exp* parse_assignment(Parser &pars);
    ast::Exp* parse_ternary(Parser &pars);
@@ -24,14 +27,6 @@ namespace parser{
    ast::Exp* parse_primary(Parser &pars);
    void clean_up(Parser &pars);
 
-   ast::Exp* parse_lor(Parser &pars);
-   ast::Exp* parse_land(Parser &pars);
-   ast::Exp* parse_bitwise(Parser &pars);
-   ast::Exp* parse_equality(Parser &pars);
-   ast::Exp* parse_comp(Parser &pars);
-   ast::Exp* parse_shift(Parser &pars);
-   ast::Exp* parse_term(Parser &pars);
-   ast::Exp* parse_factor(Parser &pars);
 
    template<typename T>
    std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser&)> parse_func);
