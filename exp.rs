@@ -8,11 +8,11 @@ fn sum(x, y :: int) -> int{
    return x + y;
 }
 
-fn abs x -> x>0 ? x : -x;
-fn sum x, y -> x + y;
+fn abs x => x>0 ? x : -x;
+fn sum x, y => x + y;
 
-fn abs(x) -> x>0 ? x : -x;
-fn sum(x, y) -> x + y;
+fn abs(x) => x>0 ? x : -x;
+fn sum(x, y) => x + y;
 
 fn sum(x, y :: int) -> int => x+y;
 
@@ -20,7 +20,7 @@ fn abs(x :: int) -> int => x>0 ? x : -x;
 
 //anonymous function
 
-fn x -> x*2;
+fn x => x*2;
 fn x :: int -> int => x*2;
 fn (x :: int) -> int => x*2;
 
@@ -45,7 +45,7 @@ type point_t :: struct{
 
 type point_t :: struct{
    dist_to_center :: float = 0.0;
-   x, y :: int = 0, 0;
+   x, y           :: int   = 0, 0;
 };
 
 // type alias
@@ -54,7 +54,7 @@ type new_int_t :: int;
 
 type uint32_t :: uint32;
 
-type typename :: point_t;
+type typename :: type_value;
 
 //type union
 
@@ -86,7 +86,7 @@ type Icompare :: @T has{
 
 type List :: struct<T>{
    length :: int;
-   data   :: T[0];
+   data   :: *T;
 };
 
 fn<T> push_back(l :: List<T>, x :: T){
