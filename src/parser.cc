@@ -2,6 +2,7 @@
 #include "../include/operator.hh"
 #include "../include/parser.hh"
 #include "../include/expression.hh"
+#include "../include/type.hh"
 #include "../include/scanner.hh"
 
 
@@ -93,6 +94,21 @@ namespace parser{
       pars.errors = {};
    }
 
+   ast::Type* parse_type(Parser &pars){
+      return parse_type_union(pars);
+   }
+
+   ast::Type* parse_type_union(Parser &pars){
+      std::vector<ast::Type*> types;
+      types = parse_list<ast::Type*>(pars, OR, [](Parser &pars){
+         switch(peek(pars).type){
+
+         }
+      });
+   }
+
+   ast::Type* parse_struct_type(Parser &pars);
+   ast::Type* parse_fn_type(Parser &pars);
 
    ast::Exp* parse_expression(Parser &pars){
       return parse_assignment(pars);
