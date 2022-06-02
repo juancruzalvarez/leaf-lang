@@ -1,1 +1,1 @@
-3 +4- x ? y : z
+MONDAY | TUESDAY | THURSDAY* | const WEDNESDAY& | FRIDAY | SATURDAY& | SUNDAY

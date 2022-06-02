@@ -19,7 +19,8 @@ namespace parser{
    ast::Type* parse_type_union(Parser &pars);
    ast::Type* parse_struct_type(Parser &pars);
    ast::Type* parse_fn_type(Parser &pars);
-   
+   std::vector<ast::VariableDeclaration*> parse_var_declaration(Parser &pars);
+
    ast::Exp* parse_expression(Parser &pars);
    ast::Exp* parse_assignment(Parser &pars);
    ast::Exp* parse_ternary(Parser &pars);
