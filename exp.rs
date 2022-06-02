@@ -64,9 +64,9 @@ type typename :: type_value;
 
 
 sorted_multiples_of_2_plus_five = nums
-                                  |>sort(fn x, y => x.a>y.a ? 1 : -1)
-                                  |>filter(fn x => x%2 = 0)
-                                  |>map(fn x => x+5);
+                                  .sort(fn x, y => x.a>y.a ? 1 : -1)
+                                  .filter(fn x => x%2 = 0)
+                                  .map(fn x => x+5);
 //type union
 
 type signed_number :: int32 | int64;
@@ -85,7 +85,7 @@ type num_str_pair :: number string;
 
 //interfaces?
 
-class Iequals :: T has{
+class IEquals :: T has{
    equals :: fn T, T -> bool;
    not_equals :: fn T, T -> bool;
 }
@@ -95,10 +95,20 @@ class IComparable :: T has{
    lessThan :: fn T, T -> bool;
 }
 
+class Supa :: T is IComparable&IEquals & has{
+   number :: int;
+}
+
 type List :: struct<T :: IComparable>{
    length :: int;
    data   :: *T;
-};
+}
+
+type List :: struct<T :: IComparable>{
+   length :: int;
+   data   :: *T;
+}
+
 
 fn<T> push_back(l :: List<T>, x :: T){
 
