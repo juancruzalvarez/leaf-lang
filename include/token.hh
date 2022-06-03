@@ -15,6 +15,9 @@ namespace token
       CHAR_LITERAL,
       STR_LITERAL,
       // keywords:
+      CLASS,
+      IS,
+      HAS,
       TYPE,
       STRUCT,
       CONST,

@@ -2,12 +2,16 @@
 #include "../include/operator.hh"
 #include "../include/parser.hh"
 #include "../include/expression.hh"
+#include "../include/statement.hh"
 #include "../include/type.hh"
 #include "../include/scanner.hh"
 
 namespace
 {
-
+   void add_error(parser::Parser &pars, std::string msg)
+   {
+      pars.errors.push_back(error::Error{error::PARSER_ERROR, pars.scn.current_position, msg});
+   }
    // returns the next token without advancing.
    token::Token peek(parser::Parser &pars)
    {
@@ -41,13 +45,14 @@ namespace
       token::Token tok = peek(pars);
       if (tok.type != type)
       {
-         pars.errors.push_back({error::PARSER_ERROR, tok.pos, msg});
+         add_error(pars, msg);
          return false;
-      }else{
+      }
+      else
+      {
          advance(pars);
          return true;
       }
-      
    }
    // if the next token matches type, consume it.
    void consume_optional(parser::Parser &pars, token::TokenType type)
@@ -100,10 +105,228 @@ namespace parser
       pars.errors = {};
    }
 
-   ast::TypeClass *parse_type_class(Parser &pars){
+   ast::Statement *parse_statement(Parser &pars){
+      switch(peek(pars).type){
+         case IF:return parse_if_statement(pars);
+         case DO:return parse_do_while_statement(pars);
+         case FOR:return parse_for_statement(pars);
+         case LBRACE: return parse_block_statement(pars);
+         default:{
+            auto second = peek_2_ahead(pars).type;
+            if(second == COMMA || second == DBL_COLON ){
+               return new ast::VarDeclarationStatement{parse_var_declaration(pars)};
+            }else{
+               return new ast::ExpressionStatement{parse_expression(pars)};
+            }
+         }
+      }
+   }
+
+   ast::Statement *parse_block_statement(Parser &pars){
+      Token tok;
+      if(match(pars, LBRACE, tok)){
+         std::vector<ast::Statement*> statements;
+         while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
+         {
+            statements.push_back(parse_statement(pars));
+            consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+         }
+         consume(pars, RBRACE, "Unclosed { in has.");
+         return new ast::BlockStatement{statements};
+      }
+      return parse_statement(pars); //left recursive?? broken maybe
+   }
+
+   ast::Statement *parse_if_statement(Parser &pars){
+      consume(pars, IF, "Unexpected token, expected IF.");   //is this needed?
+      Token tok;
+      ast::Exp* condition;
+      ast::Statement *true_branch, *false_branch = nullptr;
+      condition = parse_expression(pars);
+      true_branch = parse_block_statement(pars);
+      if(match(pars, ELSE, tok)){
+         false_branch = parse_block_statement(pars);
+      }
+      return new ast::IfStatement{condition,true_branch, false_branch};
+   }
+
+   ast::Statement *parse_while_statement(Parser &pars){
+      consume(pars, WHILE, "Unexpected token, expected while.");   //is this needed?
+      Token tok;
+      ast::Exp* condition;
+      ast::Statement *statement;
+      condition = parse_expression(pars);
+      statement = parse_block_statement(pars);
+      return new ast::WhileStatement{condition,statement, false};
+   }
+
+   ast::Statement *parse_do_while_statement(Parser &pars){
+      consume(pars, DO, "Unexpected token, expected do.");   //is this needed?
+      Token tok;
+      ast::Exp* condition;
+      ast::Statement *statement;
+      statement = parse_block_statement(pars);
+      consume(pars, WHILE, "Unexpected token, expected while.");   //is this needed?
+      condition = parse_expression(pars);
+      
+      return new ast::WhileStatement{condition,statement, true};
+   }
+
+   //TODO: MAKE true and false keywords?? or make bool literal token type.
+   ast::Statement *parse_for_statement(Parser &pars){
+      consume(pars, FOR, "Unexpected token, expected for.");
+      Token tok;
+      std::vector<ast::Statement*> before, after;
+      ast::Exp* condition;
+      ast::Statement* statement;
+
+      //parse before:
+      if(match(pars, SEMICOLON, tok)){
+         before = {};
+      }else{
+         before = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+      }
+
+      //parse condition
+      if(match(pars, SEMICOLON, tok)){
+         //if condition is skiped make it true.
+         condition = new ast::LiteralExp{ast::LIT_NUM, "d1"};//TODO: this sjhoulñd be bool literal.
+      }else{
+         condition = parse_expression(pars);
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+
+      }
+
+      //parse after
+      if(match(pars, SEMICOLON, tok)){
+         after = {};
+      }else{
+         after = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
+      }
+
+      statement = parse_block_statement(pars);
+      std::cout<<"stm: "+before[0]->to_string();
+      return new ast::ForStatement{condition,before,after, statement};
+   }
+
+   ast::TypeClass *parse_type_class(Parser &pars)
+   {
+      std::string type_var;
       std::vector<std::string> is;
-      std::vector<ast::Trait> has;
-      parse_list<void>(pars, AMP,)
+      std::vector<ast::Trait *> has;
+      Token tok;
+      if (!match(pars, IDENTIFIER, tok))
+      {
+         add_error(pars, "Expected identifier in typeclass.");
+      }
+      type_var = tok.val;
+      do
+      {
+
+         switch (advance(pars).type)
+         {
+         case IS:
+         {
+            if (!match(pars, IDENTIFIER, tok))
+            {
+               add_error(pars, "Expected identififer in is.");
+               return nullptr;
+            }
+            is.push_back(tok.val);
+            break;
+         }
+         case HAS:
+         {
+            std::vector<ast::Trait *> new_has = parse_has(pars);
+
+            has.insert(has.end(), new_has.begin(), new_has.end());
+            break;
+         }
+         default:
+         {
+            pars.errors.push_back(error::Error{error::PARSER_ERROR, pars.scn.current_position, "Expected is or has."});
+            return nullptr;
+         }
+         }
+      } while (match(pars, AMP, tok));
+      return new ast::TypeClass{type_var, is, has};
+   }
+
+   std::vector<ast::Trait *> parse_has(Parser &pars)
+   {
+      if (!consume(pars, LBRACE, "Unexpected token, expected {"))
+      {
+         return {};
+      }
+      std::vector<ast::Trait *> has;
+      while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
+      {
+         std::vector<ast::Trait *> new_traits = parse_trait(pars);
+         has.insert(has.end(), new_traits.begin(), new_traits.end());
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+      }
+      consume(pars, RBRACE, "Unclosed { in has.");
+      return has;
+   }
+
+   std::vector<ast::Trait *> parse_trait(Parser &pars)
+   {
+      Token tok;
+      if (peek(pars).type != IDENTIFIER)
+      {
+         add_error(pars, "Expected identifier.");
+         return {};
+      }
+      // TODO: this is shit:
+      bool parsing_member = peek_2_ahead(pars).type == COMMA || peek_2_ahead(pars).type == DBL_COLON;
+      if (!parsing_member)
+      {
+         std::string name = advance(pars).val;
+         std::vector<ast::Type *> args;
+         ast::Type *return_type;
+         if (match(pars, LPARENTESIS, tok))
+         {
+            if (match(pars, RPARENTESIS, tok))
+            {
+               args = {};
+            }
+            else
+            {
+               args = parse_list<ast::Type *>(pars, COMMA, parse_type);
+               consume(pars, RPARENTESIS, "Unclosed ( in function type.");
+            }
+         }
+         else
+         {
+            args = parse_list<ast::Type *>(pars, COMMA, parse_type);
+         }
+         if (match(pars, ARROW, tok))
+         {
+            return_type = parse_type(pars);
+         }
+         else
+         {
+            // TODO: think what to call no type. and how to represent it.
+            return_type = new ast::SimpleType{"void"};
+         }
+         return {new ast::MethodTrait{name, args, return_type}};
+      }
+      else
+      {
+         // parsing member.
+         std::vector<ast::Trait *> ret;
+         std::vector<std::string> names = parse_list<std::string>(pars, COMMA, [](Parser &pars)
+                                                                  { return advance(pars).val; });
+         consume(pars, DBL_COLON, "Unexpected token, Expected ::.");
+         ast::Type *type = parse_type(pars);
+
+         for (const auto &name : names)
+         {
+            ret.push_back(new ast::MemberTrait{name, type});
+         }
+         return ret;
+      }
    }
 
    ast::Type *parse_type(Parser &pars)
@@ -115,28 +338,49 @@ namespace parser
    {
       std::vector<ast::Type *> types;
       types = parse_list<ast::Type *>(
-         pars,
-         OR,
-         [](Parser &pars) -> ast::Type* {
-            Token tok;
-            bool is_const = match(pars, CONST, tok);
-            ast::Type* t;
-            
-            switch(peek(pars).type){
-               case IDENTIFIER: {t = new ast::SimpleType(advance(pars).val);break;}
-               case STRUCT:{ t = parse_struct_type(pars);break;}
-               case FN:{ t = parse_fn_type(pars);break;}
-               default:{ t = new ast::BadType();break;}
-            }
-            t->is_pointer = match(pars, STAR, tok);
-            t->is_ref = match(pars, AMP, tok);
+          pars,
+          OR,
+          [](Parser &pars) -> ast::Type *
+          {
+             Token tok;
+             bool is_const = match(pars, CONST, tok);
+             ast::Type *t;
+
+             switch (peek(pars).type)
+             {
+             case IDENTIFIER:
+             {
+                t = new ast::SimpleType(advance(pars).val);
+                break;
+             }
+             case STRUCT:
+             {
+                t = parse_struct_type(pars);
+                break;
+             }
+             case FN:
+             {
+                t = parse_fn_type(pars);
+                break;
+             }
+             default:
+             {
+                t = new ast::BadType();
+                break;
+             }
+             }
+             t->is_pointer = match(pars, STAR, tok);
+             t->is_ref = match(pars, AMP, tok);
              t->is_const = is_const;
              return t;
-      });
+          });
 
-      if(types.size() == 1){
+      if (types.size() == 1)
+      {
          return types[0];
-      }else{
+      }
+      else
+      {
          return new ast::UnionType{types};
       }
    }
@@ -150,12 +394,12 @@ namespace parser
       bool has_initial_vals = false;
       // TODO: make this check for errors??
       names = parse_list<std::string>(
-         pars,
-         COMMA,
-         [](Parser &pars) -> std::string{ 
-            return advance(pars).val; 
-         }
-      );
+          pars,
+          COMMA,
+          [](Parser &pars) -> std::string
+          {
+             return advance(pars).val;
+          });
 
       if (match(pars, DEFINE, tok))
       {
@@ -177,10 +421,9 @@ namespace parser
       if (has_initial_vals)
       {
          initial_vals = parse_list<ast::Exp *>(
-            pars,
-            COMMA,
-            parse_expression
-         );
+             pars,
+             COMMA,
+             parse_expression);
 
          if (names.size() != initial_vals.size())
          {
@@ -191,13 +434,11 @@ namespace parser
       for (int i = 0; i < names.size(); i++)
       {
          res.push_back(
-            new ast::VariableDeclaration{
-               type,
-               names[i],
-               has_initial_vals,
-               has_initial_vals ? initial_vals[i] : nullptr
-            }
-         );
+             new ast::VariableDeclaration{
+                 type,
+                 names[i],
+                 has_initial_vals,
+                 has_initial_vals ? initial_vals[i] : nullptr});
       }
       return res;
    }
@@ -212,19 +453,20 @@ namespace parser
       if (match(pars, LSS, tok)) // if match < then read template variables. ::struct<a,b>{}
       {
          // TODO; make this check for errors.
-        template_vars = parse_list<std::string>(
-            pars,
-            COMMA,
-            [](Parser &pars)->std::string{
-               return advance(pars).val;
-            }
-         );
+         template_vars = parse_list<std::string>(
+             pars,
+             COMMA,
+             [](Parser &pars) -> std::string
+             {
+                return advance(pars).val;
+             });
          consume(pars, GTR, "Unclosed < in struct type.");
       }
       consume(pars, LBRACE, "Unexpected token, expected {.");
       // NOTE: this makes semicolons not optional in struct type.
-      while(peek(pars).type != RBRACE){
-         std::cout<<"Hola hola\n";
+      while (peek(pars).type != RBRACE)
+      {
+         std::cout << "Hola hola\n";
          auto vec = parse_var_declaration(pars);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
          vars.insert(vars.end(), vec.begin(), vec.end());
@@ -233,7 +475,7 @@ namespace parser
       consume(pars, RBRACE, "Unclosed { in struct type.");
       return new ast::StructType{template_vars, vars};
    }
-   
+
    ast::Type *parse_fn_type(Parser &pars)
    {
       Token tok;
@@ -245,12 +487,12 @@ namespace parser
       {
          // TODO; make this check for errors.
          template_vars = parse_list<std::string>(
-            pars,
-            COMMA,
-            [](Parser &pars)->std::string{
-               return advance(pars).val;
-            }
-         );
+             pars,
+             COMMA,
+             [](Parser &pars) -> std::string
+             {
+                return advance(pars).val;
+             });
          consume(pars, GTR, "Unclosed < in function type.");
       }
 
@@ -431,8 +673,6 @@ namespace parser
       }
       }
    }
-
-
 
    template <typename T>
    std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser &)> parse_func)

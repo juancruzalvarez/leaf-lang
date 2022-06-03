@@ -149,38 +149,67 @@ namespace ast
       virtual std::string to_string() { return "Bad Type"; }
    };
 
-   class TypeClass{
-   public:
-      std::string type_var;
-      std::vector<std::string>is;
-
-   };
-
    enum TraitType{
       TRAIT_INVALID,
       TRAIT_MEMBER,
       TRAIT_METHOD
    };
+
    class Trait{
    public:
       virtual std::string to_string(){return "invalid_trait";}
       virtual TraitType get_type(){return TRAIT_INVALID;}
    };
+   
    class MemberTrait : public Trait{
    public:
-      MemberTrait(NameAndType* member):member(member){}
-      std::string to_string() override{return member->to_string();}
+      MemberTrait(std::string name, ast::Type* type):name(name), type(type){}
+      std::string to_string() override{return "name: "+name+" type: "+type->to_string();}
       virtual TraitType get_type(){return TRAIT_MEMBER;}
-      NameAndType* member;
+      std::string name;
+       ast::Type* type;
    };
 
    class MethodTrait : public Trait{
    public:
       MethodTrait(std::string name, std::vector<ast::Type*> args, ast::Type* return_type): name(name), args(args),return_type(return_type){}
+      std::string to_string() override{
+         std::string ret =  "Method :: \nname: "+name+"\nArgs:\n";
+         for(const auto& arg : args){
+            ret+= arg->to_string() +"\n";
+         }
+         ret += "Returns: " + return_type->to_string();
+         return ret;
+      }
       std::string name;
       std::vector<ast::Type*> args;
       ast::Type* return_type;
    };
+
+   class TypeClass{
+   public:
+      std::string type_var;
+      std::vector<std::string>is;
+      std::vector<ast::Trait*>has;
+      TypeClass(std::string type_var,
+      std::vector<std::string>is,
+      std::vector<ast::Trait*>has) : type_var(type_var),is (is), has(has) {};
+      std::string to_string(){
+         std::string ret = "Typeclass: \n Type_Var: "+type_var+"\n Is:\n";
+
+         for(const auto& iss :is){
+            ret+=iss+"\n";
+         }
+         ret+="Has:\n";
+         for(const auto& hass :has){
+            ret+=hass->to_string()+"\n";
+         }
+         return ret;
+      }
+
+   };
+
+   
 };
 
 #endif

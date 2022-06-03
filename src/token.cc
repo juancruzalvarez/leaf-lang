@@ -21,6 +21,12 @@ namespace token
          return "char_literal";
       case STR_LITERAL:
          return "str_literal";
+      case CLASS:
+         return "class";
+      case IS:
+         return "is";
+      case HAS:
+         return "has";
       case TYPE:
          return "type";
       case STRUCT:
@@ -176,6 +182,9 @@ namespace token
       {"return", RETURN},
       {"break", BREAK},
       {"continue", CONTINUE},
+      {"class", CLASS},
+      {"is", IS},
+      {"has", HAS}
    };
    
    TokenType get_keyword_type(std::string val)

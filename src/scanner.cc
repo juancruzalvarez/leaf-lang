@@ -43,7 +43,13 @@ namespace scanner
       // returns the next character in the file and advances the stream.
       char get_char(scanner::Scanner &scn)
       {
-         return scn.file.get();
+         char c = scn.file.get();
+         scn.current_position.line_offset++;
+         if(c == '\n'){
+            scn.current_position.line++;
+            scn.current_position.line_offset = 0;
+         }
+         return c;
       }
 
 

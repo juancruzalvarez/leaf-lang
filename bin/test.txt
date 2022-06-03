@@ -1,1 +1,4 @@
-MONDAY | TUESDAY | THURSDAY* | const WEDNESDAY& | FRIDAY | SATURDAY& | SUNDAY
+if x<4 
+   x += 55;
+else
+   x-=55;

@@ -80,7 +80,7 @@ type unsigned_number :: uint32 | uint64;
 
 type number :: signed_number | unsigned_number;
 
-//type product
+//type product ???????????????????????
 
 type point :: number number;
 
@@ -90,7 +90,7 @@ type num_str_pair :: number string;
 
 //interfaces?
 
-class IEquals :: T has{
+class IEqable :: T has{
    fn (T) equals T -> bool;
    fn T ( >= ) T -> bool
    equals :: fn T, T -> bool;
@@ -98,12 +98,12 @@ class IEquals :: T has{
 }
 
 class IComparable :: T has{
-   equals(T) -> bool;
+   equals T -> bool;
    greaterThan :: fn T, T -> bool;
    lessThan :: fn T, T -> bool;
 }
 
-class Supa :: T is IComparable&IEquals & has{
+class Supa :: T is IComparable & is IEqable & has{
    number :: int;
 }
 
@@ -174,6 +174,10 @@ for a:=0, b:=100; a>b; a++, b-- {
 i::int = 1;
 for ; i<5; i++ {
 
+}
+
+for ;; {
+   
 }
 
 //while loop

@@ -5,6 +5,7 @@
 #include "error.hh"
 #include "scanner.hh"
 #include "expression.hh"
+#include "statement.hh"
 #include "type.hh"
 
 namespace parser{
@@ -15,6 +16,19 @@ namespace parser{
    };
 
    void init(Parser &pars, const char* file_path);
+
+   ast::Statement *parse_statement(Parser &pars);
+   ast::Statement *parse_block_statement(Parser &pars);
+   ast::Statement *parse_if_statement(Parser &pars);
+   ast::Statement *parse_while_statement(Parser &pars);
+   ast::Statement *parse_do_while_statement(Parser &pars);
+   ast::Statement *parse_for_statement(Parser &pars);
+
+   ast::TypeClass *parse_type_class(Parser &pars);
+   std::vector<ast::Trait *> parse_has(Parser &pars);
+   std::vector<ast::Trait *> parse_trait(Parser &pars);
+
+
    ast::Type* parse_type(Parser &pars);
    ast::Type* parse_type_union(Parser &pars);
    ast::Type* parse_struct_type(Parser &pars);

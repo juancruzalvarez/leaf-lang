@@ -8,11 +8,12 @@ int main(){
    parser::Parser pars;
    parser::init(pars, "test.txt");
    token::Token tok;
-   auto vars = parser::parse_type(pars);
+   auto vars = parser::parse_statement(pars);
   /* for(const auto& var : vars ){
       printf( var->to_string());
    }*/
-   std::cout<< vars->to_string()<<"\n";
+   if (vars)
+      std::cout<< vars->to_string()<<"\n";
    if(pars.errors.size()>0){
       std::cout<<"Errors: \n";
       for(const auto& err : pars.errors){
