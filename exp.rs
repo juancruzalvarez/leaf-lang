@@ -46,6 +46,11 @@ fn (point :: &point_t) move(x, y :: int){
    point.y+=y;
 }
 
+//???????????????????????????
+fn (a :: point_t) (==) (b :: point_t) -> bool{
+
+}
+
 
 //default values
 
@@ -86,11 +91,14 @@ type num_str_pair :: number string;
 //interfaces?
 
 class IEquals :: T has{
+   fn (T) equals T -> bool;
+   fn T ( >= ) T -> bool
    equals :: fn T, T -> bool;
    not_equals :: fn T, T -> bool;
 }
 
 class IComparable :: T has{
+   equals(T) -> bool;
    greaterThan :: fn T, T -> bool;
    lessThan :: fn T, T -> bool;
 }
