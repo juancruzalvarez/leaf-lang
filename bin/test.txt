@@ -1,3 +1,7 @@
-for i:=4; i<55; i++ {
-   print(i);
+{
+   x, y :: int = 0, 32;
+   while(x<y){
+      printf(x);
+      x++;
+   }
 }

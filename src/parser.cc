@@ -106,23 +106,45 @@ namespace parser
    }
 
    ast::Statement *parse_statement(Parser &pars){
+
+
       switch(peek(pars).type){
          case IF:return parse_if_statement(pars);
          case DO:return parse_do_while_statement(pars);
          case FOR:return parse_for_statement(pars);
+         case WHILE: return parse_while_statement(pars);
          case LBRACE: return parse_block_statement(pars);
          default:{
             auto second = peek_2_ahead(pars).type;
             if(second == COMMA || second == DBL_COLON || second == DEFINE){
-               return new ast::VarDeclarationStatement{parse_var_declaration(pars)};
+                     std::cout<<"VARDEC!\n";
+                           std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+
+
+               auto ret = new ast::VarDeclarationStatement{parse_var_declaration(pars)};
+               std::cout<<"ENDTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+               return ret;
             }else{
-               return new ast::ExpressionStatement{parse_expression(pars)};
+                     std::cout<<"EXP!\n";
+                     std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+
+               auto ret = new ast::ExpressionStatement{parse_expression(pars)};
+                     std::cout<<"ENDTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+               return ret;
             }
          }
       }
    }
 
    ast::Statement *parse_block_statement(Parser &pars){
+      std::cout<<"BLOCK!\n";
+            std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+
       Token tok;
       consume(pars, LBRACE, "uNexpected token, expected {.");
       std::vector<ast::Statement*> statements;
@@ -132,10 +154,16 @@ namespace parser
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
       consume(pars, RBRACE, "Unclosed { in has.");
+      std::cout<<"ENDTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+                     
       return new ast::BlockStatement{statements};
    }
 
    ast::Statement *parse_if_statement(Parser &pars){
+      std::cout<<"IF!\n";
+      std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type);
+
       consume(pars, IF, "Unexpected token, expected IF.");   //is this needed?
       Token tok;
       ast::Exp* condition;
@@ -143,22 +171,36 @@ namespace parser
       condition = parse_expression(pars);
       true_branch = parse_block_statement(pars);
       if(match(pars, ELSE, tok)){
-         false_branch = parse_block_statement(pars);
+         if(peek(pars).type == IF){
+            false_branch = parse_if_statement(pars);
+         }else{
+            false_branch = parse_block_statement(pars);
+         }
       }
+      std::cout<<"ENDTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       return new ast::IfStatement{condition, true_branch, false_branch};
    }
 
    ast::Statement *parse_while_statement(Parser &pars){
+            std::cout<<"WHILE!\n";
+std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       consume(pars, WHILE, "Unexpected token, expected while.");   //is this needed?
       Token tok;
       ast::Exp* condition;
       ast::Statement *statement;
       condition = parse_expression(pars);
       statement = parse_block_statement(pars);
+      std::cout<<"ENDTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       return new ast::WhileStatement{condition,statement, false};
    }
 
    ast::Statement *parse_do_while_statement(Parser &pars){
+            std::cout<<"DOWHILE!\n";
+std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       consume(pars, DO, "Unexpected token, expected do.");   //is this needed?
       Token tok;
       ast::Exp* condition;
@@ -167,11 +209,17 @@ namespace parser
       consume(pars, WHILE, "Unexpected token, expected while.");   //is this needed?
       condition = parse_expression(pars);
       consume(pars, SEMICOLON, "Expected ;.");
+      std::cout<<"ENDTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       return new ast::WhileStatement{condition,statement, true};
    }
 
    //TODO: MAKE true and false keywords?? or make bool literal token type.
    ast::Statement *parse_for_statement(Parser &pars){
+            std::cout<<"FOR!\n";
+std::cout<<"FIRSTTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"TOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
+
       consume(pars, FOR, "Unexpected token, expected for.");
       Token tok;
       std::vector<ast::Statement*> before, after;
@@ -184,9 +232,6 @@ namespace parser
       }else{
          before = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
-         for(const auto& a : before){
-            std::cout<<a->to_string()<<"\n";
-         }
       }
 
       //parse condition
@@ -195,10 +240,7 @@ namespace parser
          condition = new ast::LiteralExp{ast::LIT_NUM, "d1"};//TODO: this sjhoulñd be bool literal.
       }else{
          condition = parse_expression(pars);
-         std::cout<<condition->to_string()<<"\n";
-
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
-
       }
 
       //parse after
@@ -207,15 +249,10 @@ namespace parser
          unget(pars, tok);//returns { to the parser, so that it can be consumed in parse_block
       }else{
          after = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
-         for(const auto& a : after){
-            std::cout<<a->to_string()<<"\n";
-         }
       }
-      std::cout<<"we";
       statement = parse_block_statement(pars);
-      std::string stmS = statement->to_string();
-      std::cout<<"stm: ";
-      std::cout<<"fucksi";
+      std::cout<<"ENDTOK:"<<token::type_to_str(peek(pars).type)<<"\n";
+                     std::cout<<"ENDTOK:POS:"<<peek(pars).pos.line<<":"<<peek(pars).pos.line_offset<<"\n";
       return new ast::ForStatement{condition, before, after, statement};
    }
 
@@ -551,7 +588,7 @@ namespace parser
 
    ast::Exp *parse_ternary(Parser &pars)
    {
-      ast::Exp *exp = parse_binary(pars, 0);
+      ast::Exp *exp = parse_binary(pars, -1);
       Token tok;
       if (match(pars, TERNARY, tok))
       {
@@ -571,12 +608,16 @@ namespace parser
       Token op;
       while (match(pars, {LOR, LAND, AMP, OR, XOR, EQL, NEQL, GTR, GEQ, LSS, LEQ, SHR, SHL, ADD, SUB, STAR, DIV, MOD}, op))
       {
+
+         std::cout<<"op: "<<type_to_str(op.type)<<" precedence: "<<min_precedence<<" ";
+
          operators::OperatorInfo op_info = operators::get_operator_info(op.type);
          if (op_info.precedence < min_precedence)
          {
+            unget(pars, op);
             break;
          }
-         int next_min_precedence = op_info.r_associative ? op_info.precedence + 1 : op_info.precedence;
+         int next_min_precedence = op_info.r_associative ? op_info.precedence  : op_info.precedence+1;
          ast::Exp *rhs = parse_binary(pars, next_min_precedence);
          exp = new ast::BinaryExp(operators::get_binary_operator(op.type), exp, rhs);
       }

@@ -90,7 +90,6 @@ namespace ast{
       StatementKind get_kind() override { return STATEMENT_FOR;};
       std::string to_string() override {
          std::string ret = "For statement:\n";
-         ret+= "Before: \n";
          for(const auto& stm: before){
             ret+= stm->to_string() + "\n";
          }
@@ -100,6 +99,10 @@ namespace ast{
             ret+= stm->to_string() + "\n";
          }
          ret+="Statement: \n";
+         if(statement == nullptr){
+            std::cout<< "isnull";
+         }
+
          ret+= statement->to_string();
          return ret;
       };
@@ -115,13 +118,10 @@ namespace ast{
    public:
       StatementKind get_kind() override { return STATEMENT_BLOCK;};
       std::string to_string() override {
-         std::cout<<"before to string size=" <<statements.size()<<"\n";
          std::string ret = "Block:\n";
          for(const auto& stm: statements){
-            std::cout<<"lopsyloop\n";
             ret+= stm->to_string() + "\n";
          }
-         std::cout<<"after ur tostring\n";
          return ret;
       };
       BlockStatement(std::vector<ast::Statement*> statements): statements(statements){};
