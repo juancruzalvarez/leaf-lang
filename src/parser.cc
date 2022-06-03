@@ -113,7 +113,7 @@ namespace parser
          case LBRACE: return parse_block_statement(pars);
          default:{
             auto second = peek_2_ahead(pars).type;
-            if(second == COMMA || second == DBL_COLON ){
+            if(second == COMMA || second == DBL_COLON || second == DEFINE){
                return new ast::VarDeclarationStatement{parse_var_declaration(pars)};
             }else{
                return new ast::ExpressionStatement{parse_expression(pars)};
@@ -124,17 +124,15 @@ namespace parser
 
    ast::Statement *parse_block_statement(Parser &pars){
       Token tok;
-      if(match(pars, LBRACE, tok)){
-         std::vector<ast::Statement*> statements;
-         while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
-         {
-            statements.push_back(parse_statement(pars));
-            consume(pars, SEMICOLON, "Unexpected token, expected ;.");
-         }
-         consume(pars, RBRACE, "Unclosed { in has.");
-         return new ast::BlockStatement{statements};
+      consume(pars, LBRACE, "uNexpected token, expected {.");
+      std::vector<ast::Statement*> statements;
+      while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
+      {
+         statements.push_back(parse_statement(pars));
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      return parse_statement(pars); //left recursive?? broken maybe
+      consume(pars, RBRACE, "Unclosed { in has.");
+      return new ast::BlockStatement{statements};
    }
 
    ast::Statement *parse_if_statement(Parser &pars){
@@ -147,7 +145,7 @@ namespace parser
       if(match(pars, ELSE, tok)){
          false_branch = parse_block_statement(pars);
       }
-      return new ast::IfStatement{condition,true_branch, false_branch};
+      return new ast::IfStatement{condition, true_branch, false_branch};
    }
 
    ast::Statement *parse_while_statement(Parser &pars){
@@ -168,7 +166,7 @@ namespace parser
       statement = parse_block_statement(pars);
       consume(pars, WHILE, "Unexpected token, expected while.");   //is this needed?
       condition = parse_expression(pars);
-      
+      consume(pars, SEMICOLON, "Expected ;.");
       return new ast::WhileStatement{condition,statement, true};
    }
 
@@ -186,6 +184,9 @@ namespace parser
       }else{
          before = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+         for(const auto& a : before){
+            std::cout<<a->to_string()<<"\n";
+         }
       }
 
       //parse condition
@@ -194,20 +195,28 @@ namespace parser
          condition = new ast::LiteralExp{ast::LIT_NUM, "d1"};//TODO: this sjhoulñd be bool literal.
       }else{
          condition = parse_expression(pars);
+         std::cout<<condition->to_string()<<"\n";
+
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
 
       }
 
       //parse after
-      if(match(pars, SEMICOLON, tok)){
+      if(match(pars, LBRACE, tok)){
          after = {};
+         unget(pars, tok);//returns { to the parser, so that it can be consumed in parse_block
       }else{
          after = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
+         for(const auto& a : after){
+            std::cout<<a->to_string()<<"\n";
+         }
       }
-
+      std::cout<<"we";
       statement = parse_block_statement(pars);
-      std::cout<<"stm: "+before[0]->to_string();
-      return new ast::ForStatement{condition,before,after, statement};
+      std::string stmS = statement->to_string();
+      std::cout<<"stm: ";
+      std::cout<<"fucksi";
+      return new ast::ForStatement{condition, before, after, statement};
    }
 
    ast::TypeClass *parse_type_class(Parser &pars)
@@ -448,7 +457,6 @@ namespace parser
       Token tok;
       std::vector<std::string> template_vars;
       std::vector<ast::VariableDeclaration *> vars;
-      ast::Type *return_type;
       consume(pars, STRUCT, "Invalid struct type, expected struct.");
       if (match(pars, LSS, tok)) // if match < then read template variables. ::struct<a,b>{}
       {
