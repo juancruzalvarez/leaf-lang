@@ -25,6 +25,17 @@ namespace ast
       bool is_pointer = false, is_ref = false, is_const = false;
    };
 
+   class NameAndType 
+   {
+      public:
+      NameAndType(ast::Type* type, std::string name) : type(type), name(name){};
+      std::string to_string(){
+         return "Name: " +name +"type: "+ type->to_string();
+      }
+      std::string name;
+      ast::Type* type;
+   };
+ 
    class VariableDeclaration
    {
    public:
@@ -156,12 +167,19 @@ namespace ast
       virtual TraitType get_type(){return TRAIT_INVALID;}
    };
    class MemberTrait : public Trait{
-      std::string to_string() override{return "invalid_trait";}
+   public:
+      MemberTrait(NameAndType* member):member(member){}
+      std::string to_string() override{return member->to_string();}
       virtual TraitType get_type(){return TRAIT_MEMBER;}
+      NameAndType* member;
    };
 
    class MethodTrait : public Trait{
-
+   public:
+      MethodTrait(std::string name, std::vector<ast::Type*> args, ast::Type* return_type): name(name), args(args),return_type(return_type){}
+      std::string name;
+      std::vector<ast::Type*> args;
+      ast::Type* return_type;
    };
 };
 

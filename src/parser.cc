@@ -100,6 +100,12 @@ namespace parser
       pars.errors = {};
    }
 
+   ast::TypeClass *parse_type_class(Parser &pars){
+      std::vector<std::string> is;
+      std::vector<ast::Trait> has;
+      parse_list<void>(pars, AMP,)
+   }
+
    ast::Type *parse_type(Parser &pars)
    {
       return parse_type_union(pars);
@@ -425,6 +431,8 @@ namespace parser
       }
       }
    }
+
+
 
    template <typename T>
    std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser &)> parse_func)
