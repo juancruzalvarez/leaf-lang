@@ -1,4 +1,3 @@
-if x<4 
-   x += 55;
-else
-   x-=55;
+for i:=4; i<55; i++ {
+   print(i);
+}

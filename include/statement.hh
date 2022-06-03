@@ -115,10 +115,13 @@ namespace ast{
    public:
       StatementKind get_kind() override { return STATEMENT_BLOCK;};
       std::string to_string() override {
+         std::cout<<"before to string size=" <<statements.size()<<"\n";
          std::string ret = "Block:\n";
          for(const auto& stm: statements){
+            std::cout<<"lopsyloop\n";
             ret+= stm->to_string() + "\n";
          }
+         std::cout<<"after ur tostring\n";
          return ret;
       };
       BlockStatement(std::vector<ast::Statement*> statements): statements(statements){};
