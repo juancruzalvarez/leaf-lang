@@ -244,22 +244,22 @@ namespace parser
       consume(pars, FOR, "Unexpected token, expected for.");
 
       Token tok;
-      ast::Statement *before, *after;
+      std::vector<ast::Statement *>before, after;
       ast::Exp *condition;
       ast::Statement *statement;
 
       // parse before:
       if (match(pars, SEMICOLON, tok))
       {
-         before = nullptr;
+         before = {};
       }
       else
       {
-         before = parse_statement(pars);
+         before = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      std::cout<<"before:"<<before->to_string()<<"\n";
-
+      for(const auto& stm: before)
+         std::cout<<stm->to_string();
       // parse condition
       if (match(pars, SEMICOLON, tok))
       {
@@ -276,17 +276,15 @@ namespace parser
       // parse after
       if (match(pars, LBRACE, tok))
       {
-         after = nullptr;
+         after = {};
          unget(pars, tok); // returns { to the parser, so that it can be consumed in parse_block
       }
       else
       {
-         after = parse_statement(pars);
+         after = parse_list<ast::Statement*>(pars,COMMA, parse_statement);
       }
-            std::cout<<"after:"<<after->to_string()<<"\n";
 
       statement = parse_block_statement(pars);
-                  std::cout<<"statement:"<<statement->to_string()<<"\n";
 
       return new ast::ForStatement{condition, before, after, statement};
    }
@@ -504,12 +502,9 @@ namespace parser
          initial_vals = parse_list<ast::Exp *>(
              pars,
              COMMA,
-             parse_expression);
-
-         if (names.size() != initial_vals.size())
-         {
-            // TODO: check if this is error or intentional and what to return.
-         }
+             parse_expression,
+             names.size()
+         );
       }
       std::vector<ast::VariableDeclaration *> res = {};
       for (int i = 0; i < names.size(); i++)
@@ -519,7 +514,9 @@ namespace parser
                  type,
                  names[i],
                  has_initial_vals,
-                 has_initial_vals ? initial_vals[i] : nullptr});
+                 has_initial_vals ? initial_vals[i] : nullptr
+               }
+            );
       }
       return res;
    }
@@ -768,6 +765,26 @@ namespace parser
 
       } while (match(pars, separator, tok));
 
+      return list;
+   }
+
+   template <typename T>
+   std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser &)> parse_func, int count)
+   {
+      std::vector<T> list{};
+      Token tok;
+      int i = 0;
+      do
+      {
+         list.push_back(parse_func(pars));
+         i++;
+      } while (i<count && match(pars, separator, tok) );
+
+      if(i<count){
+         std::cout<<"Expected "+std::to_string(count) +" ammount of elements. Got only "+std::to_string(i)+".";
+         add_error(pars, "Expected "+std::string{count}+" ammount of elements. Got only "+std::string{i}+".");
+      }
+      std::cout<<"Next token: "<<type_to_str(peek(pars).type);
       return list;
    }
 };

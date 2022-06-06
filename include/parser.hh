@@ -54,5 +54,8 @@ namespace parser{
 
    template<typename T>
    std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser&)> parse_func);
+   template<typename T>
+   std::vector<T> parse_list(Parser &pars, token::TokenType separator, std::function<T(Parser &)> parse_func, int count);
+
 };
 #endif

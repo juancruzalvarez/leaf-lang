@@ -100,22 +100,21 @@ namespace ast
       std::string to_string() override
       {
          std::string ret = "For statement:\n Before:";
-         if (before)
-            ret += before->to_string() + "\n";
+         for(const auto& stm : before)
+            ret += stm->to_string() + "\n";
          ret += "Condition: " + condition->to_string() + "\n";
          ret += "After: \n";
-         if (after)
-            ret += after->to_string() + "\n";
+         for(const auto& stm : after)
+            ret += stm->to_string() + "\n";
          ret += "Statement: \n";
 
          ret += statement->to_string();
          return ret;
       };
-      ForStatement(ast::Exp *condition, ast::Statement *before, ast::Statement *after, ast::Statement *statement)
+      ForStatement(ast::Exp *condition, std::vector<ast::Statement *>before, std::vector<ast::Statement *>after, ast::Statement *statement)
        : condition(condition), before(before), after(after), statement(statement){};
       ast::Exp *condition;
-      ast::Statement *before;
-      ast::Statement *after;
+      std::vector<ast::Statement *>before, after;
       ast::Statement *statement;
    };
 

@@ -9,8 +9,8 @@ int main(){
    parser::init(pars, "test.txt");
    token::Token tok;
    auto vars = parser::parse_statement(pars);
-  /* for(const auto& var : vars ){
-      printf( var->to_string());
+ /* for(const auto& var : vars ){
+      std::cout<< var->to_string();
    }*/
    if (vars){
       std::cout<< vars->to_string()<<"\n";

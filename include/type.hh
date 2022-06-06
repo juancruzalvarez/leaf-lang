@@ -24,17 +24,6 @@ namespace ast
       virtual std::string to_string() { return "invalid_type"; }
       bool is_pointer = false, is_ref = false, is_const = false;
    };
-
-   class NameAndType 
-   {
-      public:
-      NameAndType(ast::Type* type, std::string name) : type(type), name(name){};
-      std::string to_string(){
-         return "Name: " +name +"type: "+ type->to_string();
-      }
-      std::string name;
-      ast::Type* type;
-   };
  
    class VariableDeclaration
    {
