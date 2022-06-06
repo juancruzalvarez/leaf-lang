@@ -13,6 +13,7 @@ namespace scanner
       std::fstream file;
       Position current_position;
       std::list<token::Token> token_buffer;
+      token::Token last_advanced_token;
    };
 
    // initialize scanner for reading file at file_path.

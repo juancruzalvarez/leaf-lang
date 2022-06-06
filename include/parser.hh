@@ -6,6 +6,7 @@
 #include "scanner.hh"
 #include "expression.hh"
 #include "statement.hh"
+#include "declaration.hh"
 #include "type.hh"
 
 namespace parser{
@@ -16,6 +17,11 @@ namespace parser{
    };
 
    void init(Parser &pars, const char* file_path);
+
+   ast::Declaration *parse_declaration(Parser &pars);
+   ast::Declaration *parse_fn_declaration(Parser &pars);
+   ast::Declaration *parse_type_declaration(Parser &pars);
+
 
    ast::Statement *parse_statement(Parser &pars);
    ast::Statement *parse_block_statement(Parser &pars);

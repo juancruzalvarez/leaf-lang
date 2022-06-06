@@ -1,7 +1,4 @@
-{
-   x, y :: int = 0, 32;
-   while(x<y){
-      printf(x);
-      x++;
-   }
-}
+if x>3 {
+   x+43;
+}else if x<3
+   fucku(awefawef);

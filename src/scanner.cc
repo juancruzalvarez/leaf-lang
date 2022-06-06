@@ -613,6 +613,7 @@ namespace scanner
       }
       token::Token tok = scn.token_buffer.front();
       scn.token_buffer.pop_front();
+      scn.last_advanced_token = tok;
       return tok;
    }
 
@@ -636,7 +637,7 @@ namespace scanner
 
    token::Token peek_n(Scanner &scn, int n)
    {
-      while (scn.token_buffer.size() < 2)
+      while (scn.token_buffer.size() < n)
       {
          read_next_token(scn);
       }
