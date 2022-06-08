@@ -10,6 +10,7 @@ namespace ast
    enum class ExpType
    {
       EXP_INVALID,
+      EXP_EMPTY,
       EXP_UNARY,
       EXP_BINARY,
       EXP_TERNARY,
@@ -110,6 +111,15 @@ namespace ast
       std::string to_string() override {return "bad exp";};
 
       ExpType get_type() override { return ExpType::EXP_INVALID; };
+   };
+
+   class EmptyExp : public Exp
+   {
+      public:
+      EmptyExp(){};
+      std::string to_string() override {return "empty exp";};
+
+      ExpType get_type() override { return ExpType::EXP_EMPTY; };
    };
 }
 #endif

@@ -1,3 +1,3 @@
 cd src
-g++ -o ../bin/main main.cc scanner.cc token.cc parser.cc operator.cc
+g++ -o ../bin/main main.cc scanner.cc token.cc parser.cc operator.cc -Wall
 cd ..

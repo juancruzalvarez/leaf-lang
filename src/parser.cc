@@ -101,6 +101,7 @@ namespace parser
       scanner::init(pars.scn, file_path);
       pars.errors = {};
    }
+   
    void clean_up(Parser &pars)
    {
       scanner::clean_up(pars.scn);
@@ -121,15 +122,97 @@ namespace parser
 
    ast::Declaration *parse_fn_declaration(Parser &pars){
       consume(pars, FN, "Expected fn.");
+      Token tok;
       std::string name;
+      std::vector<std::string> template_vars;
+      bool is_method = false;
+      ast::NameAndType* method_name_and_type;
       std::vector<ast::NameAndType*> args;
-      bool is_short;
+      ast::Type* return_type;
+      bool is_short = false;
       ast::Statement* body;
+      if (match(pars, LSS, tok)) // if match < then read template variables. fn<a,b>
+      {
+         // TODO; make this check for errors.
+         template_vars = parse_list<std::string>(
+             pars,
+             COMMA,
+             [](Parser &pars) -> std::string
+             {
+                return advance(pars).val;
+             });
+         consume(pars, GTR, "Unclosed < in function type.");
+      }
+      if (match(pars, LPARENTESIS, tok)){
+         is_method = true;
+         std::string name;
+         ast::Type* type;
+         if(!match(pars, IDENTIFIER, tok)){
+            add_error(pars, "Expected identifier.");
+            return new ast::InvalidDeclaration{};
+         }
+         name = tok.val;
+         if(! consume(pars, DBL_COLON, "Expected :: .")){
+            return new ast::InvalidDeclaration{};
+         }
+         std::cout<<"!!!!current token: "<<type_to_str(peek(pars).type)<<"\n";
+         type = parse_type(pars);
+                  std::cout<<"!!!!current token: "<<type_to_str(peek(pars).type)<<"\n";
+
+         method_name_and_type = new ast::NameAndType{name, type};
+         consume(pars, RPARENTESIS, "Unclosed (.");
+      }
+      if(!match(pars, IDENTIFIER, tok)){
+         add_error(pars, "Expected identifier.");
+         return new ast::InvalidDeclaration{};
+      }
+      name = tok.val;
+      bool has_parentesis = match(pars, LPARENTESIS, tok);
+      auto args_ = parse_list<std::vector<ast::NameAndType*>>(
+         pars,
+         COMMA,
+         [](Parser &pars) -> std::vector<ast::NameAndType*>{
+            auto names = parse_list<std::string>(
+               pars,
+               COMMA,
+               [](Parser &pars) -> std::string
+               {
+                  return advance(pars).val;
+               }
+            );
+            consume(pars, DBL_COLON, "Expected :: .");
+            auto type = parse_type(pars);
+            std::vector<ast::NameAndType*> ret;
+            for(const auto& name : names){
+               ret.push_back(new ast::NameAndType{name, type});
+            }
+            return ret;
+         }
+      );
+      for(const auto& new_args : args_){
+         args.insert(args.end(), new_args.begin(), new_args.end());
+      }
+      if(has_parentesis){
+         consume(pars, RPARENTESIS, "Unclosed (.");
+      }
+      if(match(pars, ARROW, tok)){
+         return_type = parse_type(pars);
+      }else{
+         return_type = new ast::SimpleType("void");
+      }
+      if(match(pars, FAT_ARROW, tok)){
+         is_short = true;
+         body = new ast::ExpressionStatement{parse_expression(pars)};
+      }else{
+         body = parse_block_statement(pars);
+      }
+      return new ast::FunctionDeclaration{name, template_vars, is_method, method_name_and_type, args, return_type, is_short, body};
    }
 
    ast::Declaration *parse_type_declaration(Parser &pars){
       consume(pars, TYPE, "Expected type.");
       std::string name = advance(pars).val;
+      consume(pars, DBL_COLON, "Unexpected token, expected :: .");
       ast::Type* type = parse_type(pars);
       return new ast::TypeDeclaration{name, type};
    }
@@ -156,6 +239,20 @@ namespace parser
          return parse_while_statement(pars);
       case LBRACE:
          return parse_block_statement(pars);
+      case BREAK:
+         advance(pars);
+         return new ast::SimpleStatement(ast::STATEMENT_BREAK);
+      case CONTINUE:
+         advance(pars);
+         return new ast::SimpleStatement(ast::STATEMENT_CONTINUE);
+      case RETURN:{
+         advance(pars);
+         if(peek(pars).type == SEMICOLON){
+            return new ast::ReturnStatement{new ast::EmptyExp{}};
+         }else{
+            return new ast::ReturnStatement{parse_expression(pars)};
+         }
+      }
       default:
       {
          auto second = peek_2_ahead(pars).type;
@@ -173,23 +270,16 @@ namespace parser
 
    ast::Statement *parse_block_statement(Parser &pars)
    {
-      Token tok;
-      if (match(pars, LBRACE, tok))
+      consume(pars, LBRACE, "Expected {");
+      std::vector<ast::Statement *> statements;
+      while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
       {
-         std::vector<ast::Statement *> statements;
-         while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
-         {
-            statements.push_back(parse_statement(pars));
-            if (pars.scn.last_advanced_token.type != RBRACE)
-               consume(pars, SEMICOLON, "Unexpected token, expected ;.");
-         }
-         consume(pars, RBRACE, "Unclosed { in has.");
-         return new ast::BlockStatement{statements};
+         statements.push_back(parse_statement(pars));
+         if (pars.scn.last_advanced_token.type != RBRACE)
+            consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      else
-      {
-         return parse_statement(pars);
-      }
+      consume(pars, RBRACE, "Unclosed { in block.");
+      return new ast::BlockStatement{statements};
    }
 
    ast::Statement *parse_if_statement(Parser &pars)
@@ -258,8 +348,7 @@ namespace parser
          before = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      for(const auto& stm: before)
-         std::cout<<stm->to_string();
+
       // parse condition
       if (match(pars, SEMICOLON, tok))
       {
@@ -271,7 +360,6 @@ namespace parser
          condition = parse_expression(pars);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      std::cout<<"cond:"<<condition->to_string()<<"\n";
 
       // parse after
       if (match(pars, LBRACE, tok))
@@ -422,9 +510,10 @@ namespace parser
           [](Parser &pars) -> ast::Type *
           {
              Token tok;
-             bool is_const = match(pars, CONST, tok);
              ast::Type *t;
-
+             bool is_const = match(pars, CONST, tok);
+             bool is_ref = match(pars, AMP, tok);
+            
              switch (peek(pars).type)
              {
              case IDENTIFIER:
@@ -449,8 +538,8 @@ namespace parser
              }
              }
              t->is_pointer = match(pars, STAR, tok);
-             t->is_ref = match(pars, AMP, tok);
-             t->is_const = is_const;
+             t->is_const =is_const;
+             t->is_ref = is_ref;
              return t;
           });
 
@@ -781,10 +870,8 @@ namespace parser
       } while (i<count && match(pars, separator, tok) );
 
       if(i<count){
-         std::cout<<"Expected "+std::to_string(count) +" ammount of elements. Got only "+std::to_string(i)+".";
-         add_error(pars, "Expected "+std::string{count}+" ammount of elements. Got only "+std::string{i}+".");
+         add_error(pars, "Expected "+std::to_string(count)+" ammount of elements. Got only "+std::to_string(i)+".");
       }
-      std::cout<<"Next token: "<<type_to_str(peek(pars).type);
       return list;
    }
 };

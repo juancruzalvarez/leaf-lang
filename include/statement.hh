@@ -8,6 +8,10 @@ namespace ast
    enum StatementKind
    {
       STATEMENT_INVALID,
+      STATEMENT_EMPTY,
+      STATEMENT_RETURN,
+      STATEMENT_BREAK,
+      STATEMENT_CONTINUE,
       STATEMENT_BLOCK,
       STATEMENT_EXPRESSION,
       STATEMENT_VAR_DECLARATION,
@@ -24,10 +28,30 @@ namespace ast
       virtual std::string to_string() { return "invalid_statement"; };
    };
 
-   class InvalidStatement : public Statement
-   {
-      StatementKind get_kind() override { return STATEMENT_INVALID; };
-      std::string to_string() override { return "invalid_statement"; };
+   class SimpleStatement : public Statement {
+   public:
+      SimpleStatement(StatementKind kind) : kind(kind){};
+      StatementKind kind;
+      std::string to_string() override{
+         switch (kind)
+         {
+            case STATEMENT_BREAK: return "Break Statement.";
+            case STATEMENT_CONTINUE: return "Continue Statement.";
+            case STATEMENT_EMPTY: return "Empty Statement.";
+            default:return "Invalid Statement.";
+         }
+      };
+      StatementKind get_kind() override{
+         return kind;
+      }
+   };
+   
+   class ReturnStatement : public Statement{
+   public:
+      StatementKind get_kind() override {return STATEMENT_RETURN;};
+      std::string to_string() override {return "Return : " + expression->to_string();};
+      ReturnStatement(ast::Exp* expression):expression(expression){};
+      ast::Exp* expression;
    };
 
    class ExpressionStatement : public Statement

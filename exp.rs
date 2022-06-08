@@ -41,6 +41,7 @@ type point_t :: struct{
    x, y :: int;
 }
 
+//type ? :: fn(&point_t)
 fn (point :: &point_t) move(x, y :: int){
    point.x+=x;
    point.y+=y;
@@ -159,6 +160,9 @@ d := 32;
 e, f, g :: float = 0.5, 0.6 ,0.7; 
 
 h, i := 4.3, 4.5;
+
+x, i := 43  //not allowed...
+x, y, z := 43, 44, 45, 46 //not good.
 
 
 //for loop
