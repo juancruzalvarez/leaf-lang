@@ -94,6 +94,7 @@ namespace ast
       LIT_CHAR,
       LIT_FN
    };
+   
    class LiteralExp : public Exp
    {
       public:

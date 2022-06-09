@@ -13,7 +13,6 @@ namespace ast
       TYPE_STRUCT,
       TYPE_FUNCTION,
       TYPE_UNION,
-      TYPE_AND,
       TYPE_INVALID
    };
 
@@ -22,7 +21,7 @@ namespace ast
    public:
       virtual TypeKind get_kind() { return TYPE_INVALID; };
       virtual std::string to_string() { return "invalid_type"; }
-      bool is_pointer = false, is_ref = false, is_const = false;
+      bool is_pointer = false, is_const = false;
    };
  
    class VariableDeclaration
@@ -72,7 +71,6 @@ namespace ast
       {
          std::string res = is_const ? "const " : "";
          res += is_pointer ? "ptr " : "";
-         res += is_ref ? "ref " : "";
          res += "struct{\n";
          for (const auto &var : vars)
          {
@@ -120,7 +118,6 @@ namespace ast
       {
          std::string res = is_const ? "const " : "";
          res += is_pointer ? "ptr " : "";
-         res += is_ref ? "ref " : "";
          res += "Union{ ";
          for (const auto &type : types)
          {

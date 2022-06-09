@@ -155,10 +155,7 @@ namespace parser
          if(! consume(pars, DBL_COLON, "Expected :: .")){
             return new ast::InvalidDeclaration{};
          }
-         std::cout<<"!!!!current token: "<<type_to_str(peek(pars).type)<<"\n";
          type = parse_type(pars);
-                  std::cout<<"!!!!current token: "<<type_to_str(peek(pars).type)<<"\n";
-
          method_name_and_type = new ast::NameAndType{name, type};
          consume(pars, RPARENTESIS, "Unclosed (.");
       }
@@ -512,8 +509,6 @@ namespace parser
              Token tok;
              ast::Type *t;
              bool is_const = match(pars, CONST, tok);
-             bool is_ref = match(pars, AMP, tok);
-            
              switch (peek(pars).type)
              {
              case IDENTIFIER:
@@ -539,7 +534,6 @@ namespace parser
              }
              t->is_pointer = match(pars, STAR, tok);
              t->is_const =is_const;
-             t->is_ref = is_ref;
              return t;
           });
 

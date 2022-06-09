@@ -8,10 +8,6 @@ fn sum(x, y :: int) -> int{
    return x + y;
 }
 
-fn abs x => x>0 ? x : -x;
-fn sum x, y => x + y;
-
-fn abs(x) => x>0 ? x : -x;
 fn sum(x, y) => x + y;
 
 fn sum(x, y :: int) -> int => x+y;
@@ -23,6 +19,12 @@ fn abs(x :: int) -> int => x>0 ? x : -x;
 fn x => x*2;
 fn x :: int -> int => x*2;
 fn (x :: int) -> int => x*2;
+
+abs_f := fn x => x>0 ? x : -x;
+fn x, y => x + y;
+
+fn (x) => x>0 ? x : -x;
+
 
 //function type:
 
@@ -41,8 +43,8 @@ type point_t :: struct{
    x, y :: int;
 }
 
-//type ? :: fn(&point_t)
-fn (point :: &point_t) move(x, y :: int){
+
+fn (point :: point_t*) move(x, y :: int){
    point.x+=x;
    point.y+=y;
 }
@@ -81,25 +83,18 @@ type unsigned_number :: uint32 | uint64;
 
 type number :: signed_number | unsigned_number;
 
-//type product ???????????????????????
-
-type point :: number number;
-
-type str_num_pair :: string number;
-
-type num_str_pair :: number string;
 
 //interfaces?
 
 class IEqable :: T has{
-   fn (T) equals T -> bool;
-   fn T ( >= ) T -> bool
+   fn (T) equals T -> bool; // ????????????
+   fn T ( >= ) T -> bool;   //??????????????
    equals :: fn T, T -> bool;
    not_equals :: fn T, T -> bool;
 }
 
 class IComparable :: T has{
-   equals T -> bool;
+   equals(T) -> bool;
    greaterThan :: fn T, T -> bool;
    lessThan :: fn T, T -> bool;
 }
@@ -130,7 +125,7 @@ type Icomparable :: Iequals&Icompare;
 
 type point_t :: struct{
    x, y :: int;
-   equals := fn (a, b :: point_t) :: bool => a.x == b.x && a.y == b.y;
+   equals     := fn (a, b :: point_t) :: bool => a.x == b.x && a.y == b.y;
    not_equals := fn (a, b :: point_t) :: bool => !equals();
 }
 
@@ -155,6 +150,14 @@ const DAYS_OF_THE_WEEK{
 //variable declaration
 
 a, b :: int;
+a, b :: i32;
+a, b :: u8;
+a, b :: float;
+a, b :: double;
+a, b :: f32;
+a, b :: f64;
+a, b :: bool;
+
 c :: int = 32;
 d := 32;
 e, f, g :: float = 0.5, 0.6 ,0.7; 

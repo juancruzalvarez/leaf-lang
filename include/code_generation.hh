@@ -4,6 +4,10 @@
 
 namespace code_gen{
    
+   struct Context{
+      
+   };
+
    struct Value{
       std::string name;
       std::string val;
