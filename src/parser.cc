@@ -107,6 +107,43 @@ namespace parser
       scanner::clean_up(pars.scn);
       pars.errors = {};
    }
+ 
+   ParsedFile parse_file(Parser &pars){
+      ParsedFile parsed;
+      ast::Declaration* current_declaration;
+      while(peek(pars).type != TEOF){
+         current_declaration = parse_declaration(pars);
+         switch(current_declaration->get_kind()){
+            case ast::DECLARATION_TYPE:{
+               auto type_dec = dynamic_cast<ast::TypeDeclaration*>(current_declaration);
+               auto type = type_dec->type;
+               if(type->get_kind() == ast::TYPE_SIMPLE){
+                  parsed.type_aliases.push_back(type_dec);
+               }else{
+                  parsed.types.push_back(type_dec);
+               }
+               break;
+            }
+            case ast::DECLARATION_FN:{
+               auto fn_dec = dynamic_cast<ast::FunctionDeclaration*>(current_declaration);
+               if(fn_dec->is_method){
+                  parsed.methods.push_back(fn_dec);
+               }else{
+                  parsed.functions.push_back(fn_dec);
+               }
+               break;
+            }
+            case ast::DECLARATION_TYPE_CLASS:{
+               parsed.type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
+               break;
+            }
+
+         }
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+      }
+      return parsed;
+   }
+
 
    ast::Declaration *parse_declaration(Parser &pars){
       switch (peek(pars).type)
@@ -115,6 +152,8 @@ namespace parser
          return parse_fn_declaration(pars);
       case TYPE:
          return parse_type_declaration(pars);
+      case CLASS:
+         return parse_type_class_declaration(pars);
       default:
          return new ast::InvalidDeclaration{};
       }

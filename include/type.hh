@@ -53,7 +53,6 @@ namespace ast
       {
          std::string res = is_const ? "const " : "";
          res += is_pointer ? "ptr " : "";
-         res += is_ref ? "ref " : "";
          res += val;
          return res;
       }
@@ -93,7 +92,6 @@ namespace ast
       {
          std::string res = is_const ? "const " : "";
          res += is_pointer ? "ptr " : "";
-         res += is_ref ? "ref " : "";
          res += "fn{\n";
          res += "Args:";
          for (const auto arg : args)

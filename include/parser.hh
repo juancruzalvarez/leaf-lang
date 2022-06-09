@@ -16,12 +16,22 @@ namespace parser{
       error::Errors errors;
    };
 
+   struct ParsedFile{
+      std::vector<ast::TypeDeclaration*> type_aliases;
+      std::vector<ast::TypeClassDeclaration*>type_classes; 
+      std::vector<ast::TypeDeclaration*> types;
+      std::vector<ast::FunctionDeclaration*> functions;
+      std::vector<ast::FunctionDeclaration*> methods;
+   };
+
    void init(Parser &pars, const char* file_path);
+
+   ParsedFile parse_file(Parser &pars);
 
    ast::Declaration *parse_declaration(Parser &pars);
    ast::Declaration *parse_fn_declaration(Parser &pars);
    ast::Declaration *parse_type_declaration(Parser &pars);
-
+    ast::Declaration *parse_type_class_declaration(Parser &pars);
 
    ast::Statement *parse_statement(Parser &pars);
    ast::Statement *parse_block_statement(Parser &pars);
