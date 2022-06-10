@@ -256,6 +256,7 @@ namespace parser
    ast::Declaration *parse_type_class_declaration(Parser &pars){
       consume(pars, CLASS, "Expected class.");
       std::string name = advance(pars).val;
+      consume(pars, DBL_COLON, "Expected ::.");
       ast::TypeClass* type_class = parse_type_class(pars);
       return new ast::TypeClassDeclaration{name, type_class};
    }

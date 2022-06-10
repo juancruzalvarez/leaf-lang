@@ -61,8 +61,7 @@ namespace ast
       ast::DeclarationKind get_kind() override { return DECLARATION_FN; };
       std::string to_string() override
       {
-         std::string ret = "function declaration:\n";
-         ret += "Name: " + name + "\n";
+         std::string ret = "Name: " + name + "\n";
          ret += is_method? "Is method.\n": "";
          ret += is_method? ("Method: "+method_name_and_type->to_string()+ "\n") : ""; 
          ret += "Return type: " + return_type->to_string() + "\n";
@@ -91,7 +90,7 @@ namespace ast
    public:
       TypeDeclaration(std::string name, ast::Type *type) : name(name), type(type){};
       DeclarationKind get_kind() override { return DECLARATION_TYPE; };
-      std::string to_string() override { return "Type declaration: \nName: " + name + "\nType: " + type->to_string(); };
+      std::string to_string() override { return "Name: " + name + "\nType: " + type->to_string(); };
       std::string name;
       ast::Type *type;
    };
@@ -101,7 +100,7 @@ namespace ast
    public:
       TypeClassDeclaration(std::string name, ast::TypeClass *type_class) : name(name), type_class(type_class){};
       DeclarationKind get_kind() override { return DECLARATION_TYPE_CLASS; };
-      std::string to_string() override { return "Type class declaration: \nName: " + name + "\nType: " + type_class->to_string(); };
+      std::string to_string() override { return "Name: " + name + "\nType: " + type_class->to_string(); };
       std::string name;
       ast::TypeClass *type_class;
    };
