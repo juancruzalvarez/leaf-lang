@@ -204,30 +204,37 @@ namespace parser
       }
       name = tok.val;
       bool has_parentesis = match(pars, LPARENTESIS, tok);
-      auto args_ = parse_list<std::vector<ast::NameAndType*>>(
-         pars,
-         COMMA,
-         [](Parser &pars) -> std::vector<ast::NameAndType*>{
-            auto names = parse_list<std::string>(
-               pars,
-               COMMA,
-               [](Parser &pars) -> std::string
-               {
-                  return advance(pars).val;
+      std::vector<std::vector<ast::NameAndType*>> args_list;
+      if(has_parentesis && peek(pars).type == RPARENTESIS){
+         args_list = {};
+      }else{      
+         args_list = parse_list<std::vector<ast::NameAndType*>>(
+            pars,
+            COMMA,
+            [](Parser &pars) -> std::vector<ast::NameAndType*>{
+               auto names = parse_list<std::string>(
+                  pars,
+                  COMMA,
+                  [](Parser &pars) -> std::string
+                  {
+                     return advance(pars).val;
+                  }
+               );
+               consume(pars, DBL_COLON, "Expected :: .");
+               auto type = parse_type(pars);
+               std::vector<ast::NameAndType*> ret;
+               for(const auto& name : names){
+                  ret.push_back(new ast::NameAndType{name, type});
                }
-            );
-            consume(pars, DBL_COLON, "Expected :: .");
-            auto type = parse_type(pars);
-            std::vector<ast::NameAndType*> ret;
-            for(const auto& name : names){
-               ret.push_back(new ast::NameAndType{name, type});
+               return ret;
             }
-            return ret;
-         }
-      );
-      for(const auto& new_args : args_){
+         );
+      }
+   
+      for(const auto& new_args : args_list){
          args.insert(args.end(), new_args.begin(), new_args.end());
       }
+
       if(has_parentesis){
          consume(pars, RPARENTESIS, "Unclosed (.");
       }
@@ -256,6 +263,7 @@ namespace parser
    ast::Declaration *parse_type_class_declaration(Parser &pars){
       consume(pars, CLASS, "Expected class.");
       std::string name = advance(pars).val;
+      consume(pars, DBL_COLON, "Unexpected token, expected ::.");
       ast::TypeClass* type_class = parse_type_class(pars);
       return new ast::TypeClassDeclaration{name, type_class};
    }
@@ -311,8 +319,11 @@ namespace parser
       while (peek(pars).type != RBRACE && peek(pars).type != TEOF)
       {
          statements.push_back(parse_statement(pars));
-         if (pars.scn.last_advanced_token.type != RBRACE)
+         if (pars.scn.last_advanced_token.type == RBRACE){
+            consume_optional(pars, SEMICOLON);
+         }else{
             consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+         }
       }
       consume(pars, RBRACE, "Unclosed { in block.");
       return new ast::BlockStatement{statements};
@@ -798,36 +809,45 @@ namespace parser
    {
       ast::Exp *exp = parse_post_inc(pars);
       Token tok;
-      while (match(pars, {DOT, LPARENTESIS}, tok))
+      while (match(pars, {DOT, LPARENTESIS, LBRACE, LBRACKET}, tok))
       {
-         if (tok.type == DOT)
-         {
-            // member access
-            tok = advance(pars);
-            if (tok.type != IDENTIFIER)
-            {
-               pars.errors.push_back({error::PARSER_ERROR, tok.pos, "Unexpected token, expected identifier."});
-               return new ast::InvalidExp{};
+         switch(tok.type){
+            case DOT:{
+               // member access
+               tok = advance(pars);
+               if (tok.type != IDENTIFIER)
+               {
+                  pars.errors.push_back({error::PARSER_ERROR, tok.pos, "Unexpected token, expected identifier."});
+                  return new ast::InvalidExp{};
+               }
+               else
+               {
+                  exp = new ast::MemberAccessExp(exp, tok.val);
+               }
+               break;   
             }
-            else
-            {
-               exp = new ast::MemberAccessExp(exp, tok.val);
+            case LPARENTESIS:{
+               // function call
+               std::vector<ast::Exp *> args;
+               if (peek(pars).type == RPARENTESIS)
+               {
+                  args = {};
+               }
+               else
+               {
+                  args = parse_list<ast::Exp *>(pars, COMMA, parse_expression);
+               }
+               consume(pars, RPARENTESIS, "Unexpected token, expeted ')'.");
+               exp = new ast::FunctionCallExp(exp, args);
+               break;
             }
-         }
-         else
-         {
-            // function call
-            std::vector<ast::Exp *> args;
-            if (peek(pars).type == RPARENTESIS)
-            {
-               args = {};
+            case LBRACKET:{
+               //subscript access
+               exp = new ast::SubscriptAcessExp(exp, parse_expression(pars));
+               consume(pars, RBRACKET, "Unexpected token, expected ].");
+               break;
             }
-            else
-            {
-               args = parse_list<ast::Exp *>(pars, COMMA, parse_expression);
-            }
-            consume(pars, RPARENTESIS, "Unexpected token, expeted ')'.");
-            exp = new ast::FunctionCallExp(exp, args);
+
          }
       }
       return exp;
@@ -865,8 +885,73 @@ namespace parser
       }
       case FN:
       {
-         return new ast::InvalidExp{};
+         std::vector<ast::NameAndType*>args;
+         ast::Type* return_type;
+         bool is_short = false; 
+         ast::Statement* body;
+         bool has_parentesis = match(pars, LPARENTESIS, tok);
+         std::vector<std::vector<ast::NameAndType*>> args_list;
+         if(has_parentesis && peek(pars).type == RPARENTESIS){
+            args_list = {};
+         }else{      
+            args_list = parse_list<std::vector<ast::NameAndType*>>(
+               pars,
+               COMMA,
+               [](Parser &pars) -> std::vector<ast::NameAndType*>{
+                  auto names = parse_list<std::string>(
+                     pars,
+                     COMMA,
+                     [](Parser &pars) -> std::string
+                     {
+                        return advance(pars).val;
+                     }
+                  );
+                  consume(pars, DBL_COLON, "Expected :: .");
+                  auto type = parse_type(pars);
+                  std::vector<ast::NameAndType*> ret;
+                  for(const auto& name : names){
+                     ret.push_back(new ast::NameAndType{name, type});
+                  }
+                  return ret;
+               }
+            );
+         }
+      
+         for(const auto& new_args : args_list){
+            args.insert(args.end(), new_args.begin(), new_args.end());
+         }
+
+         if(has_parentesis){
+            consume(pars, RPARENTESIS, "Unclosed (.");
+         }
+         if(match(pars, ARROW, tok)){
+            return_type = parse_type(pars);
+         }else{
+            return_type = new ast::SimpleType("void");
+         }
+         if(match(pars, FAT_ARROW, tok)){
+            is_short = true;
+            body = new ast::ExpressionStatement{parse_expression(pars)};
+         }else{
+            body = parse_block_statement(pars);
+         }
+         return new ast::FnLiteralExp{args, return_type, is_short, body};
       }
+      case LBRACE:
+      {
+         //struct literal
+         std::vector<ast::Exp*> members = parse_list<ast::Exp*>(pars, COMMA, parse_expression);
+         consume(pars, RBRACE, "Unclosed { expression.");
+         return new ast::StructLiteralExp{members};
+      }
+      case LBRACKET:
+      {
+         //array literal
+         std::vector<ast::Exp*> elements = parse_list<ast::Exp*>(pars, COMMA, parse_expression);
+         consume(pars, RBRACKET, "Unclosed [ expression.");
+         return new ast::ArrayLiteralExp{elements};
+      }
+
       default:
       {
          pars.errors.push_back({error::PARSER_ERROR, tok.pos, "Invalid literal value."});

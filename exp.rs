@@ -293,8 +293,8 @@ fn abs(x :: int) :: int{
 };
 
 fn main() {
-   arr     :: int64[32] = {};
-   i, j    :: int       = 0, len(arr);
+   arr           := [0, 2, 4];
+   i, j    :: int = 0, len(arr);
    point_1 :: point.Point;
    
    while i<j {

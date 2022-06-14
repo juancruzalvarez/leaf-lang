@@ -3,19 +3,10 @@
 #include <string>
 #include "type.hh"
 #include "statement.hh"
+#include "literal.hh"
 namespace ast
 {
-   class NameAndType
-   {
-   public:
-      std::string to_string()
-      {
-         return "name: " + name + " \ntype:" + type->to_string();
-      };
-      std::string name;
-      ast::Type *type;
-      NameAndType(std::string name, ast::Type *type) : name(name), type(type){};
-   };
+   
 
    enum DeclarationKind
    {

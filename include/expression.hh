@@ -5,6 +5,7 @@
 #include "operator.hh"
 
 
+
 namespace ast
 {
    enum class ExpType
@@ -18,9 +19,14 @@ namespace ast
       EXP_ANONYMOUS_FUNCTION,
       EXP_ANONYMOUS_STRUCT,
       EXP_MEMBER_ACCESS,
-      EXP_FUNCTION_CALL
+      EXP_FUNCTION_CALL,
+      EXP_SUBSC_ACCESS,
+      EXP_STRUCT_LITERAL,
+      EXP_ARRAY_LITERAL,
+      EXP_FN_LITERAL
    };
 
+ 
    class Exp
    {
    public:
@@ -66,10 +72,19 @@ namespace ast
       Exp *exp;
       std::string member;
    };
+   
+   class SubscriptAcessExp : public Exp
+   {
+   public:
+      SubscriptAcessExp(Exp *exp, Exp *subscript): exp(exp), subscript(subscript){};
+      ExpType get_type() override {return ExpType::EXP_SUBSC_ACCESS;};
+      std::string to_string() override {return exp->to_string()+ "[" + subscript->to_string()+"]";};
+      Exp *exp, *subscript;
+   };
 
    class FunctionCallExp : public Exp
    {
-      public:
+   public:
       FunctionCallExp(Exp *func, std::vector<Exp*> args) : func(func), args(args){};
       ExpType get_type() override { return ExpType::EXP_FUNCTION_CALL; };
       std::string to_string() override {
@@ -87,24 +102,7 @@ namespace ast
       std::vector<Exp *> args;
    };
 
-   enum LiteralType{
-      LIT_IDENTIFIER,
-      LIT_NUM,
-      LIT_STR,
-      LIT_CHAR,
-      LIT_FN
-   };
-   
-   class LiteralExp : public Exp
-   {
-      public:
-      LiteralExp(LiteralType type, std::string val): type(type), val(val){};
-      ExpType get_type() override { return ExpType::EXP_LITERAL; };
-      std::string to_string() override {return val;};
-      LiteralType type;
-      std::string val;
-   };
-
+  
    class InvalidExp : public Exp
    {
       public:
