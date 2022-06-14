@@ -1,18 +1,6 @@
-type point_t :: struct{
-   x, y :: int;
-};
-
-type point_alias_t :: point_t;
-
-type func :: fn int, float, u32 -> bool;
-
-class IComp :: T is Hola;
-
-fn func(x, y :: int) -> float{
-   return x+y;
-};
-
-fn (point :: point_t*) move (x, y :: int){
-   point.x += x;
-   point.y += y;
+fn sum_array(arr :: int*, n :: int)
+{
+   fn_litera := fn x -> float => 32*x;
+   struct_lit := {x, y*2};
+   array_literal := [3,6,89];
 };
