@@ -134,7 +134,7 @@ type point_t :: struct{
 //constants
 
 const PI = 3.1415;
-const PI :: float64 = 3.141596;
+const PI :: f64 = 3.141596;
 
 //not sure about this:
 const DAYS_OF_THE_WEEK{
