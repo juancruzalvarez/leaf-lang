@@ -1,6 +1,8 @@
-fn sum_array(arr :: int*, n :: int)
+fn add_from_to start, end :: i32 -> i32
 {
-   fn_litera := fn x -> float => 32*x;
-   struct_lit := {x, y*2};
-   array_literal := [3,6,89];
+
+   for i++; i<end; i++ {
+      sum -= i;
+   }
+   return sum;
 };

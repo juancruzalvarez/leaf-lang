@@ -21,20 +21,12 @@ int main(){
       std::cout<<"Parsed file:\n";
       std::cout<<"_______________________\n";
       std::cout<<"Type aliases:\n";
-<<<<<<< HEAD
       std::cout<<"_______________________\n";
-=======
-
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       for(const auto& al : parsed.type_aliases){
          std::cout<<"_______________________\n";
          std::cout<<al->to_string()<<"\n";
       }
       std::cout<<"_______________________\n";
-<<<<<<< HEAD
-=======
-      std::cout<<"_______________________\n";
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       std::cout<<"Types:\n";
       std::cout<<"_______________________\n";
       for(const auto& type : parsed.types){
@@ -42,10 +34,6 @@ int main(){
          std::cout<<type->to_string()<<"\n";
       }
       std::cout<<"_______________________\n";
-<<<<<<< HEAD
-=======
-      std::cout<<"_______________________\n";
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       std::cout<<"Type classes:\n";
       std::cout<<"_______________________\n";
       for(const auto& type_class : parsed.type_classes){
@@ -53,10 +41,6 @@ int main(){
          std::cout<<type_class->to_string()<<"\n";
       }
       std::cout<<"_______________________\n";
-<<<<<<< HEAD
-=======
-      std::cout<<"_______________________\n";
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       std::cout<<"Functions:\n";
       std::cout<<"_______________________\n";
       for(const auto& fn : parsed.functions){
@@ -64,10 +48,6 @@ int main(){
          std::cout<<fn->to_string()<<"\n";
       }
       std::cout<<"_______________________\n";
-<<<<<<< HEAD
-=======
-      std::cout<<"_______________________\n";
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       std::cout<<"Methods:\n";
       std::cout<<"_______________________\n";
       for(const auto& meth : parsed.methods){

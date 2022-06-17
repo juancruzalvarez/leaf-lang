@@ -263,11 +263,7 @@ namespace parser
    ast::Declaration *parse_type_class_declaration(Parser &pars){
       consume(pars, CLASS, "Expected class.");
       std::string name = advance(pars).val;
-<<<<<<< HEAD
       consume(pars, DBL_COLON, "Unexpected token, expected ::.");
-=======
-      consume(pars, DBL_COLON, "Expected ::.");
->>>>>>> 5309d43d156d2b0d86b1681fe169420f327f2407
       ast::TypeClass* type_class = parse_type_class(pars);
       return new ast::TypeClassDeclaration{name, type_class};
    }
@@ -420,9 +416,14 @@ namespace parser
       }
       else
       {
-         after = parse_list<ast::Statement*>(pars,COMMA, parse_statement);
+         std::cout<<"nexttt:"<<type_to_str(peek(pars).type)<<"\n";
+         after = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
       }
-
+      std::cout<<"after:\n";
+      for(const auto& af :after){
+         std::cout<<"af:"<<af->to_string()<<"\n";
+      }
+      std::cout<<"next:"<<type_to_str(peek(pars).type)<<"\n";
       statement = parse_block_statement(pars);
 
       return new ast::ForStatement{condition, before, after, statement};
@@ -902,6 +903,8 @@ namespace parser
                pars,
                COMMA,
                [](Parser &pars) -> std::vector<ast::NameAndType*>{
+                  ast::Type* type;
+                  Token tok;
                   auto names = parse_list<std::string>(
                      pars,
                      COMMA,
@@ -910,8 +913,11 @@ namespace parser
                         return advance(pars).val;
                      }
                   );
-                  consume(pars, DBL_COLON, "Expected :: .");
-                  auto type = parse_type(pars);
+                  if(match(pars, DBL_COLON, tok)){
+                     type = parse_type(pars);
+                  }else{
+                     type = new ast::SimpleType("");
+                  }
                   std::vector<ast::NameAndType*> ret;
                   for(const auto& name : names){
                      ret.push_back(new ast::NameAndType{name, type});
@@ -931,7 +937,7 @@ namespace parser
          if(match(pars, ARROW, tok)){
             return_type = parse_type(pars);
          }else{
-            return_type = new ast::SimpleType("void");
+            return_type = new ast::SimpleType("");
          }
          if(match(pars, FAT_ARROW, tok)){
             is_short = true;
@@ -969,12 +975,17 @@ namespace parser
    {
       std::vector<T> list{};
       Token tok;
-
+      std::cout<<"parse_list:";
+      std::cout<<"start pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
       do
       {
+         std::cout<<"in loop: start pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
          list.push_back(parse_func(pars));
+         std::cout<<"in loop: end pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
+
 
       } while (match(pars, separator, tok));
+      std::cout<<"end pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
 
       return list;
    }
