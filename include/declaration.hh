@@ -14,6 +14,7 @@ namespace ast
       DECLARATION_TYPE,
       DECLARATION_FN,
       DECLARATION_CONST,
+      DECLARATION_CONST_SET,
       DECLARATION_TYPE_CLASS,
    };
    class Declaration
@@ -95,5 +96,44 @@ namespace ast
       std::string name;
       ast::TypeClass *type_class;
    };
+
+   class ConstDeclaration : public Declaration
+   {
+   public:
+      ConstDeclaration(std::string name, ast::Type* type, ast::Exp* val): name(name), type(type), val(val){}
+      std::string name;
+      ast::Type* type;
+      ast::Exp* val;
+      std::string to_string() override {
+         return "const: "+ name + " \ntype:" + type->to_string() + " \nval:" + val->to_string();
+      };
+      DeclarationKind get_kind() override {
+         std::cout<<"HELLO!\n";
+         return DECLARATION_CONST;
+      };
+   };
+
+   class ConstSetDeclaration : public Declaration
+   {
+   public:
+      ConstSetDeclaration(std::string name, std::vector<Declaration*> values):name(name), values(values){}   
+      std::string name;
+      std::vector<Declaration*> values;
+      std::string to_string() override {
+         std::string ret = "Const set "+name + ":"+"\n" +"{\n";
+         for(const auto& val : values){
+            ret+= val->to_string() + ",\n";
+         }
+         ret += "}";
+         
+         return ret; 
+      };
+      DeclarationKind get_kind() override {
+                  std::cout<<"HELLO!\n";
+
+         return DECLARATION_CONST_SET;
+      };
+   };
+
 };
 #endif

@@ -137,10 +137,22 @@ namespace parser
                parsed.type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
                break;
             }
+            case ast::DECLARATION_CONST:{
+               parsed.consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
+               break;
+            }
+            case ast::DECLARATION_CONST_SET:{
+               parsed.const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
+               break;
+            }
+            default:{
+               goto end;
+            }
 
          }
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
+      end:
       return parsed;
    }
 
@@ -154,6 +166,9 @@ namespace parser
          return parse_type_declaration(pars);
       case CLASS:
          return parse_type_class_declaration(pars);
+      case CONST:
+         std::cout<<"HELLU!"<<"\n";
+         return parse_const_declaration(pars);
       default:
          return new ast::InvalidDeclaration{};
       }
@@ -268,8 +283,77 @@ namespace parser
       return new ast::TypeClassDeclaration{name, type_class};
    }
 
+   ast::Declaration *parse_const(Parser &pars)
+   {
+      Token tok;
+      std::string name;
+      ast::Type* type;
+      ast::Exp* value;
+      if(!match(pars, IDENTIFIER, tok)){
+         return new ast::InvalidDeclaration{};
+      }
+      name = tok.val;
+      if(match(pars, DBL_COLON, tok))
+      {
+         type = parse_type(pars);
+      }
+      else
+      {
+         type = new ast::SimpleType{""};
+      }
+      if(match(pars, ASSIGN, tok)){
+         value = parse_expression(pars);
+      }else{
+         value = new ast::EmptyExp{};
+      }
+
+      return new ast::ConstDeclaration{name, type, value};
+   };
+
+   ast::Declaration *parse_const_declaration(Parser &pars){
+      consume(pars, CONST, "Unexpected token, expected CONST.");
+      Token tok;
+      std::string name;
+      if(!match(pars, IDENTIFIER, tok)){
+         return new ast::InvalidDeclaration{};
+      }
+      name = tok.val;
+      std::cout<<"Name: "+ name <<"\n";
+
+
+      if (match(pars, LBRACE, tok)){
+         std::cout<<"LBRACE!"<<"\n";
+         auto values = parse_list<ast::Declaration*>(pars, COMMA, parse_const);
+         consume(pars, RBRACE, "Unexpected token, expected }.");
+         ast::Declaration* a = new ast::ConstSetDeclaration{name, values};
+         std::cout<<"a:"<<a->to_string()<<"\n";
+         return a;
+      }else{
+         ast::Type* type;
+         ast::Exp* value;
+         if(match(pars, DBL_COLON, tok))
+         {
+            type = parse_type(pars);
+         }
+         else
+         {
+            type = new ast::SimpleType{""};
+         }
+         if(match(pars, ASSIGN, tok)){
+            value = parse_expression(pars);
+         }else{
+            value = new ast::EmptyExp{};
+         }
+         auto a = new ast::ConstDeclaration{name, type, value};
+         std::cout<<"a:"<<a->to_string()<<"\n";
+         return a;
+      }
+   }
+
    ast::Statement *parse_statement(Parser &pars)
    {
+      std::cout<<"Parse statement:\n";
+      std::cout<<"STATEMENT START pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
 
       switch (peek(pars).type)
       {
@@ -310,6 +394,7 @@ namespace parser
          }
       }
       }
+
    }
 
    ast::Statement *parse_block_statement(Parser &pars)
@@ -814,7 +899,7 @@ namespace parser
    {
       ast::Exp *exp = parse_post_inc(pars);
       Token tok;
-      while (match(pars, {DOT, LPARENTESIS, LBRACE, LBRACKET}, tok))
+      while (match(pars, {DOT, LPARENTESIS, LBRACKET}, tok))
       {
          switch(tok.type){
             case DOT:{

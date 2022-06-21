@@ -7,7 +7,8 @@ int main(){
 
    parser::Parser pars;
    parser::init(pars, "test.txt");
-   token::Token tok;
+
+   
    auto parsed = parser::parse_file(pars);
 
    if(pars.errors.size()>0){
@@ -41,6 +42,20 @@ int main(){
          std::cout<<type_class->to_string()<<"\n";
       }
       std::cout<<"_______________________\n";
+      std::cout<<"Consts:\n";
+      std::cout<<"_______________________\n";
+      for(const auto& type : parsed.consts){
+         std::cout<<"_______________________\n";
+         std::cout<<type->to_string()<<"\n";
+      }
+      std::cout<<"_______________________\n";
+      std::cout<<"Const sets:\n";
+      std::cout<<"_______________________\n";
+      for(const auto& type : parsed.const_sets){
+         std::cout<<"_______________________\n";
+         std::cout<<type->to_string()<<"\n";
+      }
+      std::cout<<"_______________________\n";
       std::cout<<"Functions:\n";
       std::cout<<"_______________________\n";
       for(const auto& fn : parsed.functions){
@@ -54,6 +69,7 @@ int main(){
          std::cout<<"_______________________\n";
          std::cout<<meth->to_string()<<"\n";
       }
+
    }
    
    parser::clean_up(pars);

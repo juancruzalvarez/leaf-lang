@@ -1,8 +1,11 @@
-fn add_from_to start, end :: i32 -> i32
-{
-
-   for i++; i<end; i++ {
-      sum -= i;
-   }
-   return sum;
+const HELLO = 43;
+const DAYS {
+   LUNES,
+   MARTES,
+   JUEVES,
+   DOMINGO
 };
+
+const structt :: struct{
+   a, b :: int;
+   } = {3, 5};

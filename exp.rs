@@ -138,12 +138,12 @@ const PI :: f64 = 3.141596;
 
 //not sure about this:
 const DAYS_OF_THE_WEEK{
-   MONDAY,
-   TUESDAY,
+   MONDAY   ,
+   TUESDAY  ,
    WEDNESDAY,
-   THURSDAY,
-   FRIDAY,
-   SATURDAY,
+   THURSDAY ,
+   FRIDAY   ,
+   SATURDAY ,
    SUNDAY
 };
 

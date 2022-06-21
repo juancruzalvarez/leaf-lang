@@ -22,6 +22,8 @@ namespace parser{
       std::vector<ast::TypeDeclaration*> types;
       std::vector<ast::FunctionDeclaration*> functions;
       std::vector<ast::FunctionDeclaration*> methods;
+      std::vector<ast::ConstDeclaration*> consts;
+      std::vector<ast::ConstSetDeclaration*> const_sets;
    };
 
    void init(Parser &pars, const char* file_path);
@@ -31,8 +33,8 @@ namespace parser{
    ast::Declaration *parse_declaration(Parser &pars);
    ast::Declaration *parse_fn_declaration(Parser &pars);
    ast::Declaration *parse_type_declaration(Parser &pars);
-    ast::Declaration *parse_type_class_declaration(Parser &pars);
-
+   ast::Declaration *parse_type_class_declaration(Parser &pars);
+   ast::Declaration *parse_const_declaration(Parser &pars);
    ast::Statement *parse_statement(Parser &pars);
    ast::Statement *parse_block_statement(Parser &pars);
    ast::Statement *parse_if_statement(Parser &pars);
