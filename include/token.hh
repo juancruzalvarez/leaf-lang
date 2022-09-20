@@ -15,6 +15,10 @@ namespace token
       CHAR_LITERAL,
       STR_LITERAL,
       // keywords:
+      MODULE,
+      IMPORT,
+      PUBLIC,
+      PRIVATE,
       CLASS,
       IS,
       HAS,

@@ -4,6 +4,7 @@
 #include "type.hh"
 #include "statement.hh"
 #include "literal.hh"
+#include "code_generation.hh"
 namespace ast
 {
    
@@ -22,6 +23,7 @@ namespace ast
    public:
       virtual DeclarationKind get_kind() { return DECLARATION_INVALID; };
       virtual std::string to_string() { return "invalid_dec"; };
+      virtual void generate_code(const code_gen::Context &context);
    };
 
    class InvalidDeclaration : public Declaration
@@ -50,7 +52,9 @@ namespace ast
             return_type(return_type),
             is_short(is_short),
             body(body){};
+      
       ast::DeclarationKind get_kind() override { return DECLARATION_FN; };
+      
       std::string to_string() override
       {
          std::string ret = "Name: " + name + "\n";
@@ -67,6 +71,14 @@ namespace ast
          ret += body->to_string();
          return ret;
       };
+      
+      void generate_code(const code_gen::Context &context) override
+      {
+         //generate function header
+         
+      }
+
+
       std::string name;
       std::vector<std::string> template_vars;
       bool is_method;

@@ -1,3 +1,56 @@
+module Math
+{
+
+import "io"
+import "cl"
+
+import {
+   "Tests",
+   "Math",
+   "Drive"
+}
+
+
+
+public:
+
+   const F32_PI :: f32 = 3.141591;
+   const PI := 3.141591;
+
+   const ANGLE_TYPES {
+      RIGHT_ANGLE,
+      ACUTE_ANGLE,
+      OBTUSE_ANGLE
+   };
+
+   type Vec3 :: struct
+   {
+      x, y :: f64;
+   };
+
+   fn (a :: vec3*) add(b :: vec3) 
+   {
+      a.x += b.x;
+      a.y += b.y;
+   };
+
+   fn dot(a, b :: vec3) -> f64
+   {
+      return a.x*b.x + a.y*b.y;
+   };
+
+   fn cross(a, b :: vec3) -> vec3
+   {
+
+   };
+
+
+private:
+
+
+}
+
+
 //functions:
 // fn identifier (? list< list<identifier> :: type> )? ::? type? { block } ;?
 
@@ -293,9 +346,9 @@ fn abs(x :: int) :: int{
 };
 
 fn main() {
-   arr           := [0, 2, 4];
+   arr := [0, 2, 4];
    i, j    :: int = 0, len(arr);
-   point_1 :: point.Point;
+   point_1 :: math.Point;
    
    while i<j {
       arr[i] = i-j;

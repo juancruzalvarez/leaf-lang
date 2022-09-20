@@ -2,9 +2,16 @@
 #define TYPE_CHECK_H
 #include <string>
 #include "expression.hh"
+#include "literal.hh"
 #include "type.hh"
 
 namespace type_check{
+   
+   struct TypeChecker {
+      
+   };
+
+
     enum TYPE_COMPATIBILITY{
         TYPE_CMP_EQUALS,
         TYPE_CMP_A_CAN_HOLD_B,

@@ -21,6 +21,14 @@ namespace token
          return "char_literal";
       case STR_LITERAL:
          return "str_literal";
+      case MODULE:
+         return "module";
+      case IMPORT: 
+         return "import";
+      case PUBLIC:
+         return "public";
+      case PRIVATE:
+         return "private";
       case CLASS:
          return "class";
       case IS:
@@ -184,7 +192,11 @@ namespace token
       {"continue", CONTINUE},
       {"class", CLASS},
       {"is", IS},
-      {"has", HAS}
+      {"has", HAS},
+      {"module", MODULE},
+      {"import", IMPORT},
+      {"public", PUBLIC},
+      {"private", PRIVATE}
    };
    
    TokenType get_keyword_type(std::string val)

@@ -156,8 +156,75 @@ namespace parser
       return parsed;
    }
 
+   ast::Module *parse_module(Parser &pars)
+   {
+      ast::Module* mod = new ast::Module();
+      ast::Declaration* current_declaration;
+      Token tok;
 
-   ast::Declaration *parse_declaration(Parser &pars){
+      if(!consume(pars, MODULE, "Expected module."))
+         return nullptr;
+
+      if(!match(pars, IDENTIFIER, tok)){
+         add_error(pars, "Expected module name.");
+         return nullptr;
+      }
+
+      if(!consume(pars, LBRACE, "Expected module."))
+         return nullptr;
+
+      while(peek(pars).type == PUBLIC || peek(pars).type == PRIVATE)
+      {
+         consume(pars, COLON, "expected :.");
+         
+
+      }
+      while(peek(pars).type != TEOF && peek(pars).type != RBRACE){
+         current_declaration = parse_declaration(pars);
+         switch(current_declaration->get_kind()){
+            case ast::DECLARATION_TYPE:{
+               auto type_dec = dynamic_cast<ast::TypeDeclaration*>(current_declaration);
+               auto type = type_dec->type;
+               if(type->get_kind() == ast::TYPE_SIMPLE){
+                  parsed.type_aliases.push_back(type_dec);
+               }else{
+                  parsed.types.push_back(type_dec);
+               }
+               break;
+            }
+            case ast::DECLARATION_FN:{
+               auto fn_dec = dynamic_cast<ast::FunctionDeclaration*>(current_declaration);
+               if(fn_dec->is_method){
+                  parsed.methods.push_back(fn_dec);
+               }else{
+                  parsed.functions.push_back(fn_dec);
+               }
+               break;
+            }
+            case ast::DECLARATION_TYPE_CLASS:{
+               parsed.type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
+               break;
+            }
+            case ast::DECLARATION_CONST:{
+               parsed.consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
+               break;
+            }
+            case ast::DECLARATION_CONST_SET:{
+               parsed.const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
+               break;
+            }
+            default:{
+               goto end;
+            }
+
+         }
+         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
+      }
+   }
+
+
+   ast::Declaration *parse_declaration(Parser &pars)
+   {
       switch (peek(pars).type)
       {
       case FN:
@@ -174,7 +241,8 @@ namespace parser
       }
    }
 
-   ast::Declaration *parse_fn_declaration(Parser &pars){
+   ast::Declaration *parse_fn_declaration(Parser &pars)
+   {
       consume(pars, FN, "Expected fn.");
       Token tok;
       std::string name;
@@ -267,7 +335,8 @@ namespace parser
       return new ast::FunctionDeclaration{name, template_vars, is_method, method_name_and_type, args, return_type, is_short, body};
    }
 
-   ast::Declaration *parse_type_declaration(Parser &pars){
+   ast::Declaration *parse_type_declaration(Parser &pars)
+   {
       consume(pars, TYPE, "Expected type.");
       std::string name = advance(pars).val;
       consume(pars, DBL_COLON, "Unexpected token, expected :: .");
@@ -275,7 +344,8 @@ namespace parser
       return new ast::TypeDeclaration{name, type};
    }
 
-   ast::Declaration *parse_type_class_declaration(Parser &pars){
+   ast::Declaration *parse_type_class_declaration(Parser &pars)
+   {
       consume(pars, CLASS, "Expected class.");
       std::string name = advance(pars).val;
       consume(pars, DBL_COLON, "Unexpected token, expected ::.");
@@ -310,7 +380,8 @@ namespace parser
       return new ast::ConstDeclaration{name, type, value};
    };
 
-   ast::Declaration *parse_const_declaration(Parser &pars){
+   ast::Declaration *parse_const_declaration(Parser &pars)
+   {
       consume(pars, CONST, "Unexpected token, expected CONST.");
       Token tok;
       std::string name;

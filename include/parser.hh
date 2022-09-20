@@ -8,6 +8,7 @@
 #include "statement.hh"
 #include "declaration.hh"
 #include "type.hh"
+#include "module.hh"
 
 namespace parser{
    
@@ -17,19 +18,15 @@ namespace parser{
    };
 
    struct ParsedFile{
-      std::vector<ast::TypeDeclaration*> type_aliases;
-      std::vector<ast::TypeClassDeclaration*>type_classes; 
-      std::vector<ast::TypeDeclaration*> types;
-      std::vector<ast::FunctionDeclaration*> functions;
-      std::vector<ast::FunctionDeclaration*> methods;
-      std::vector<ast::ConstDeclaration*> consts;
-      std::vector<ast::ConstSetDeclaration*> const_sets;
+      std::vector<ast::Module> modules;
    };
+   
+   
 
    void init(Parser &pars, const char* file_path);
 
    ParsedFile parse_file(Parser &pars);
-
+   ast::Module *parse_module(Parser &pars);
    ast::Declaration *parse_declaration(Parser &pars);
    ast::Declaration *parse_fn_declaration(Parser &pars);
    ast::Declaration *parse_type_declaration(Parser &pars);

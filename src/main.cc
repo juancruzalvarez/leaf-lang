@@ -3,10 +3,11 @@
 #include "../include/scanner.hh"
 #include "../include/parser.hh"
 
-int main(){
+int main(int argc, char** argv){
 
    parser::Parser pars;
    parser::init(pars, "test.txt");
+
 
    
    auto parsed = parser::parse_file(pars);

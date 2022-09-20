@@ -1,0 +1,11 @@
+types to llmv types
+
+numerical->numerical
+
+structs -> structs
+
+aliases -> to their base type
+
+functions -> void*
+
+unions -> biggers member ??

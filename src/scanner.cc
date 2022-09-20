@@ -1,5 +1,6 @@
-#include "../include/scanner.hh"
+ #include "../include/scanner.hh"
 #include <functional>
+#include <iostream>
 
 namespace scanner
 {

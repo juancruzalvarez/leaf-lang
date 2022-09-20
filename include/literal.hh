@@ -1,9 +1,12 @@
 #ifndef LITERAL_H
 #define LITERAL_H
+
 #include "expression.hh"
 #include "type.hh"
 #include "statement.hh"
-namespace ast{
+
+namespace ast {
+
    class NameAndType
    {
    public:
@@ -67,7 +70,7 @@ namespace ast{
       std::vector<Exp*> members;
    };
 
-    class FnLiteralExp : public Exp
+   class FnLiteralExp : public Exp
    {
    public:
       FnLiteralExp(std::vector<ast::NameAndType *> args,

@@ -1,0 +1,21 @@
+module Vector {
+
+   type Vec2 :: struct {
+      x, y :: f32;
+   };
+
+   fn (a :: Vec2) + (b :: Vec2) -> Vec2 {
+      return Vec2{ a.x + b.x, a.y + b.y };
+   }
+   fn (a :: Vec2) - (b :: Vec2) -> Vec2 => Vec2{ a.x - b.x, a.y - b.y };
+   fn (a :: Vec2) * (b :: Vec2) -> Vec2 => Vec2{ a.x * b.x, a.y * b.y };
+   fn (a :: Vec2) / (b :: Vec2) -> Vec2 => Vec2{ a.x / b.x, a.y / b.y };
+
+   fn (a :: Vec2) * (b :: f32) -> Vec2 => Vec2{ a.x * b, a.y * b };
+
+   fn dot (a, b :: Vec2) -> f32 => a.x*b.x + a.y*b.y;
+   fn dist(a, b :: Vec2) -> f32 => math.Sqrt( (a.x-b.x)**2 + (a.y-b.y)**2 );
+
+
+   export Vec2, dot, dist;
+};

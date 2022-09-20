@@ -9,8 +9,8 @@ namespace code_gen{
    };
 
    struct Value{
+      std::string type;
       std::string name;
-      std::string val;
    };
 }
 
