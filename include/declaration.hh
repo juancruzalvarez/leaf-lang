@@ -23,7 +23,6 @@ namespace ast
    public:
       virtual DeclarationKind get_kind() { return DECLARATION_INVALID; };
       virtual std::string to_string() { return "invalid_dec"; };
-      virtual void generate_code(const code_gen::Context &context);
    };
 
    class InvalidDeclaration : public Declaration
@@ -72,12 +71,7 @@ namespace ast
          return ret;
       };
       
-      void generate_code(const code_gen::Context &context) override
-      {
-         //generate function header
-         
-      }
-
+     
 
       std::string name;
       std::vector<std::string> template_vars;

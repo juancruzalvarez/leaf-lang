@@ -18,7 +18,7 @@ namespace parser{
    };
 
    struct ParsedFile{
-      std::vector<ast::Module> modules;
+      std::vector<ast::Module*> modules;
    };
    
    

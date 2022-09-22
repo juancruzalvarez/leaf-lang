@@ -1,3 +1,5 @@
+module math {
+public:
 
    type Vec2 :: struct {
       x, y :: f32;
@@ -13,6 +15,9 @@
 
    fn (a :: Vec2) mult_scalar (b :: f32) -> Vec2 => Vec2{ a.x * b, a.y * b };
 
+
+private:
    fn dot (a, b :: Vec2) -> f32 => a.x*b.x + a.y*b.y;
    fn dist(a, b :: Vec2) -> f32 => math.Sqrt( (a.x-b.x)**2 + (a.y-b.y)**2 );
 
+}

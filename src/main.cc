@@ -9,6 +9,7 @@ int main(int argc, char** argv){
    parser::init(pars, "test.txt");
 
 
+
    
    auto parsed = parser::parse_file(pars);
 
@@ -21,55 +22,83 @@ int main(int argc, char** argv){
    }else{
       std::cout<<"Parsed with no errors!\n";
       std::cout<<"Parsed file:\n";
-      std::cout<<"_______________________\n";
-      std::cout<<"Type aliases:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& al : parsed.type_aliases){
+      for(const auto& mod : parsed.modules)
+      {
+         std::cout<<"Module: "<<mod->name<<"\n";
          std::cout<<"_______________________\n";
-         std::cout<<al->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Types:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& type : parsed.types){
+         std::cout<<"Type aliases:\n";
          std::cout<<"_______________________\n";
-         std::cout<<type->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Type classes:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& type_class : parsed.type_classes){
+         for(const auto& al : mod->public_declarations.type_aliases){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.type_aliases){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"Types:\n";
          std::cout<<"_______________________\n";
-         std::cout<<type_class->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Consts:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& type : parsed.consts){
+         for(const auto& al : mod->public_declarations.types){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.types){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"type_classes:\n";
          std::cout<<"_______________________\n";
-         std::cout<<type->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Const sets:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& type : parsed.const_sets){
+         for(const auto& al : mod->public_declarations.type_classes){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.type_classes){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"consts:\n";
          std::cout<<"_______________________\n";
-         std::cout<<type->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Functions:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& fn : parsed.functions){
+         for(const auto& al : mod->public_declarations.consts){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.consts){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"consts sets:\n";
          std::cout<<"_______________________\n";
-         std::cout<<fn->to_string()<<"\n";
-      }
-      std::cout<<"_______________________\n";
-      std::cout<<"Methods:\n";
-      std::cout<<"_______________________\n";
-      for(const auto& meth : parsed.methods){
+         for(const auto& al : mod->public_declarations.const_sets){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.const_sets){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"functions:\n";
          std::cout<<"_______________________\n";
-         std::cout<<meth->to_string()<<"\n";
+         for(const auto& al : mod->public_declarations.functions){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.functions){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         std::cout<<"methods:\n";
+         std::cout<<"_______________________\n";
+         for(const auto& al : mod->public_declarations.methods){
+            std::cout<<"_______________________\npublic  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+         for(const auto& al : mod->private_declarations.methods){
+            std::cout<<"_______________________\nprivate  ";
+            std::cout<<al->to_string()<<"\n";
+         }
+
       }
+      
 
    }
    
