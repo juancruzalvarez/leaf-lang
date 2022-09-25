@@ -32,7 +32,7 @@ namespace
    {
       return scanner::get(pars.scn);
    }
-   // advances the next token and returns it
+   // returns the token. Following calls to advance or peek will use the returned token.
    void unget(parser::Parser &pars, token::Token tok)
    {
       scanner::unget(pars.scn, tok);
@@ -56,13 +56,15 @@ namespace
          return true;
       }
    }
+
    // if the next token matches type, consume it.
    void consume_optional(parser::Parser &pars, token::TokenType type)
    {
       if (peek(pars).type == type)
          advance(pars);
    }
-   // if next token matches, advance it, store it in @tok and return true,
+
+   // if next token matches, advance it, store it in tok and return true,
    // else return false.
    bool match(parser::Parser &pars, token::TokenType type, token::Token &tok)
    {
@@ -74,7 +76,8 @@ namespace
       }
       return false;
    }
-   // if next token matches any of the tipes, advance it and store it in @tok and return true,
+
+   // if next token matches any of the tipes, advance it and store it in tok and return true,
    // else return false.
    bool match(parser::Parser &pars, std::vector<token::TokenType> types, token::Token &tok)
    {
@@ -118,84 +121,46 @@ namespace parser
 
    ast::Module *parse_module(Parser &pars)
    {
-      ast::Module* mod = new ast::Module();
-      ast::Declaration* current_declaration;
+      ast::Module* mod;
       Token tok;
-
-      if(!consume(pars, MODULE, "Expected module."))
+      
+      if(!consume(pars, MODULE, "Unexpected token, expected 'module'."))
          return nullptr;
-
-      if(!match(pars, IDENTIFIER, tok)){
-         add_error(pars, "Expected module name.");
+      
+      if(!match(pars, IDENTIFIER, tok)) {
+         add_error(pars, "Unexpected token, expected identifier (Module name)");
          return nullptr;
       }
+
       mod->name = tok.val;
-      if(!consume(pars, LBRACE, "Expected {."))
+      
+      if(!consume(pars, LBRACE, "Unexpected token, expected '{'."))
          return nullptr;
 
-      auto current_list = mod->private_declarations;
-      while(peek(pars).type == PUBLIC || peek(pars).type == PRIVATE)
-      {
-         if(advance(pars).type == PUBLIC)
-            current_list = mod->public_declarations;
-         else
-            current_list = mod->private_declarations;
-
-         if(!consume(pars, COLON, "expected :."))
-            return nullptr;
-
-         tok = peek(pars);
-         while(tok.type == FN || tok.type == CONST || tok.type == TYPE ||tok.type == CLASS){
-            current_declaration = parse_declaration(pars);
-            switch(current_declaration->get_kind()){
-               case ast::DECLARATION_TYPE:{
-                  auto type_dec = dynamic_cast<ast::TypeDeclaration*>(current_declaration);
-                  auto type = type_dec->type;
-                  if(type->get_kind() == ast::TYPE_SIMPLE){
-                     current_list.type_aliases.push_back(type_dec);
-                  }else{
-                     current_list.types.push_back(type_dec);
-                  }
-                  break;
-               }
-               case ast::DECLARATION_FN:{
-                  auto fn_dec = dynamic_cast<ast::FunctionDeclaration*>(current_declaration);
-                  if(fn_dec->is_method){
-                     current_list.methods.push_back(fn_dec);
-                  }else{
-                     current_list.functions.push_back(fn_dec);
-                  }
-                  break;
-               }
-               case ast::DECLARATION_TYPE_CLASS:{
-                  current_list.type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
-                  break;
-               }
-               case ast::DECLARATION_CONST:{
-                  current_list.consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
-                  break;
-               }
-               case ast::DECLARATION_CONST_SET:{
-                  current_list.const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
-                  break;
-               }
-               default:{
-                  std::cout<<"type:"<<current_declaration->to_string()<<"\n";
-                  add_error(pars, "unexpected declaration type!");
-                  return nullptr;
-               }
-
-            }
-
+      std::vector<ast::Declaration*> private_list, public_list;
+      std::vector<ast::Declaration*> current_list;
+      while(match(pars, {PUBLIC, PRIVATE}, tok)) {
+         std::cout<<"private public"<<"\n";
+         current_list = tok.type == PUBLIC ? public_list : private_list;
+         consume(pars, COLON, "Expected ':' following public or private.");
+         while(match(pars, {FN, CONST, TYPE, CLASS}, tok)) {
+            std::cout<<"FNCONSTTYPECLASS"<<"\n";
+            unget(pars, tok);
+            current_list.push_back(parse_declaration(pars));
+            consume(pars, SEMICOLON, "Expected ';' after declaration.");
          }
-     
-         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
-      consume(pars, RBRACE, "Expected }.");
-   
+
+
+      if(!consume(pars, RBRACE, "Unexpected token, expected '{'."))
+         add_error(pars, "Missing closing '}' in module declaration.");
+
+      mod->private_declarations = private_list;
+      mod->public_declarations = public_list;
+      return mod;
    }
 
-
+   
    ast::Declaration *parse_declaration(Parser &pars)
    {
       switch (peek(pars).type)

@@ -22,9 +22,10 @@ namespace ast
    struct Module{
       std::string name;
       std::vector<std::string> imports;
-      ParsedDeclarations public_declarations;
-      ParsedDeclarations private_declarations;
+      std::vector<ast::Declaration*> public_declarations;
+      std::vector<ast::Declaration*> private_declarations;
    };
+   
 };
 
 #endif
