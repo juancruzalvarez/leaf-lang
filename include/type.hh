@@ -21,6 +21,7 @@ namespace ast
    public:
       virtual TypeKind get_kind() { return TYPE_INVALID; };
       virtual std::string to_string() { return "invalid_type"; }
+      virtual std::string to_llmv_type() { return "invalid_type";};
       bool is_pointer = false, is_const = false;
    };
  
@@ -56,6 +57,13 @@ namespace ast
          res += val;
          return res;
       }
+      std::string to_llmv_type() override 
+      {
+         if (is_pointer)
+            return "ptr";
+         else
+            return "%"+val;
+      }
       std::string val;
    };
 
@@ -78,6 +86,18 @@ namespace ast
          res += '}';
          return res;
       }
+
+      std::string to_llmv_type() override {
+         std::string llmv_type = "type {";
+         for(const auto& v : vars){
+            llmv_type += v->type->to_llmv_type() + ", ";
+         }
+         llmv_type.pop_back();
+         llmv_type.pop_back();
+         llmv_type += '}';
+         return llmv_type;
+      }
+
       std::vector<std::string> template_vars;
       std::vector<ast::VariableDeclaration *> vars;
    };
@@ -102,6 +122,21 @@ namespace ast
          res += "}";
          return res;
       }
+
+      std::string to_llmv_type() override 
+      {
+         if(is_pointer)
+            return "ptr";
+         std::string llmv_type = return_type->to_llmv_type() + " (";
+         for (const auto arg : args)
+         {
+            llmv_type += arg->to_llmv_type() + ", ";
+         }
+         llmv_type.pop_back();
+         llmv_type.pop_back();
+         llmv_type+= ')';
+      }
+
       std::vector<std::string> template_vars;
       std::vector<ast::Type *> args;
       ast::Type *return_type;

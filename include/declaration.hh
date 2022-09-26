@@ -90,6 +90,11 @@ namespace ast
       TypeDeclaration(std::string name, ast::Type *type) : name(name), type(type){};
       DeclarationKind get_kind() override { return DECLARATION_TYPE; };
       std::string to_string() override { return "Name: " + name + "\nType: " + type->to_string(); };
+      void gen_code(code_gen::Context contex) override 
+      {
+         
+      };
+
       std::string name;
       ast::Type *type;
    };

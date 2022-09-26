@@ -24,5 +24,16 @@ namespace type_check{
         
     }
 
-    std::string get_exp_result_type(ast::Exp*);
+    std::string get_exp_result_type(ast::Exp*){
+
+    }
+
+    std::string type_to_llmv(code_gen::Context context, ast::Type* type)
+    {
+        if(type->get_kind() == ast::TYPE_SIMPLE)
+            return context.resolved_types[dynamic_cast<ast::SimpleType*>(type)->val];
+            
+    }
+
+
 };

@@ -1,10 +1,12 @@
 #ifndef CODE_GENERATION_H
 #define CODE_GENERATION_H
 #include <string>
+#include <map>
 
 namespace code_gen{
    
    struct Context{
+      std::map<std::string, std::string> resolved_types;
       std::vector<std::string> llmv_code;
    };
 
@@ -13,9 +15,7 @@ namespace code_gen{
       std::string name;
    };
 
-   void add_line(Context contex, std::string line){
-      contex.llmv_code.push_back(line);
-   }
+   void add_line(Context &context, std::string line);
 }
 
 #endif

@@ -101,15 +101,5 @@ int main(){
 
       }
    
-   for(const auto& mod : parsed.modules) {
-      std::cout<< "Module " << mod->name  << "\n";
-      std::cout<< "Public declarations:"  << "\n";
-      for(const auto& pd : mod->public_declarations)
-         std::cout<< pd->to_string() << "\n";
-      std::cout<< "Private declarations:" << "\n";
-      for(const auto& pd : mod->private_declarations)
-         std::cout<< pd->to_string() << "\n";
-   }
-
    parser::clean_up(pars);
 }

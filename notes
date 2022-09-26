@@ -1,11 +1,5 @@
-types to llmv types
+only have to resolve all aliases.
+then every type declaration when generating code is
 
-numerical->numerical
+%name = llmv_type_string
 
-structs -> structs
-
-aliases -> to their base type
-
-functions -> void*
-
-unions -> biggers member ??
