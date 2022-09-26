@@ -32,7 +32,7 @@ namespace
    {
       return scanner::get(pars.scn);
    }
-   // advances the next token and returns it
+   // returns the token. Following calls to advance or peek will use the returned token.
    void unget(parser::Parser &pars, token::Token tok)
    {
       scanner::unget(pars.scn, tok);
@@ -56,13 +56,15 @@ namespace
          return true;
       }
    }
+
    // if the next token matches type, consume it.
    void consume_optional(parser::Parser &pars, token::TokenType type)
    {
       if (peek(pars).type == type)
          advance(pars);
    }
-   // if next token matches, advance it, store it in @tok and return true,
+
+   // if next token matches, advance it, store it in tok and return true,
    // else return false.
    bool match(parser::Parser &pars, token::TokenType type, token::Token &tok)
    {
@@ -74,7 +76,8 @@ namespace
       }
       return false;
    }
-   // if next token matches any of the tipes, advance it and store it in @tok and return true,
+
+   // if next token matches any of the tipes, advance it and store it in tok and return true,
    // else return false.
    bool match(parser::Parser &pars, std::vector<token::TokenType> types, token::Token &tok)
    {
@@ -118,6 +121,7 @@ namespace parser
 
    ast::Module *parse_module(Parser &pars)
    {
+<<<<<<< HEAD
 
       if(!consume(pars, MODULE, "Expected module."))
          return nullptr;
@@ -128,10 +132,22 @@ namespace parser
 
       if(!match(pars, IDENTIFIER, tok)) {
          add_error(pars, "Expected module name.");
+=======
+      ast::Module* mod;
+      Token tok;
+      
+      if(!consume(pars, MODULE, "Unexpected token, expected 'module'."))
+         return nullptr;
+      
+      if(!match(pars, IDENTIFIER, tok)) {
+         add_error(pars, "Unexpected token, expected identifier (Module name)");
+>>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
          return nullptr;
       }
+
       mod->name = tok.val;
-      if(!consume(pars, LBRACE, "Expected {."))
+      
+      if(!consume(pars, LBRACE, "Unexpected token, expected '{'."))
          return nullptr;
       if(match(pars, IMPORT, tok)) {
          consume(pars, LBRACE, "Expected { before import list.");
@@ -139,6 +155,7 @@ namespace parser
          consume(pars, RBRACE, "Expected } .");
       }
 
+<<<<<<< HEAD
       ast::ParsedDeclarations *private_declarations = new ast::ParsedDeclarations{},
        *public_declarations = new ast::ParsedDeclarations{};
       auto current_list = private_declarations;
@@ -202,10 +219,32 @@ namespace parser
 
       mod->private_declarations = private_declarations;
       mod->public_declarations = public_declarations;
+=======
+      std::vector<ast::Declaration*> private_list, public_list;
+      std::vector<ast::Declaration*> current_list;
+      while(match(pars, {PUBLIC, PRIVATE}, tok)) {
+         std::cout<<"private public"<<"\n";
+         current_list = tok.type == PUBLIC ? public_list : private_list;
+         consume(pars, COLON, "Expected ':' following public or private.");
+         while(match(pars, {FN, CONST, TYPE, CLASS}, tok)) {
+            std::cout<<"FNCONSTTYPECLASS"<<"\n";
+            unget(pars, tok);
+            current_list.push_back(parse_declaration(pars));
+            consume(pars, SEMICOLON, "Expected ';' after declaration.");
+         }
+      }
+
+
+      if(!consume(pars, RBRACE, "Unexpected token, expected '{'."))
+         add_error(pars, "Missing closing '}' in module declaration.");
+
+      mod->private_declarations = private_list;
+      mod->public_declarations = public_list;
+>>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
       return mod;
    }
 
-
+   
    ast::Declaration *parse_declaration(Parser &pars)
    {
       switch (peek(pars).type)

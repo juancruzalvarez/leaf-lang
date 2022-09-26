@@ -3,14 +3,11 @@
 #include "../include/scanner.hh"
 #include "../include/parser.hh"
 
-int main(int argc, char** argv){
+int main(){
 
    parser::Parser pars;
    parser::init(pars, "test.txt");
 
-
-
-   
    auto parsed = parser::parse_file(pars);
 
 
@@ -21,6 +18,7 @@ int main(int argc, char** argv){
          std::cout<<err.msg<<"\n";
       }
    }
+<<<<<<< HEAD
       std::cout<<"Parsed with no errors!\n";
       std::cout<<"Parsed file:\n";
 
@@ -103,6 +101,18 @@ int main(int argc, char** argv){
          }
 
       }
+=======
+>>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
    
+   for(const auto& mod : parsed.modules) {
+      std::cout<< "Module " << mod->name  << "\n";
+      std::cout<< "Public declarations:"  << "\n";
+      for(const auto& pd : mod->public_declarations)
+         std::cout<< pd->to_string() << "\n";
+      std::cout<< "Private declarations:" << "\n";
+      for(const auto& pd : mod->private_declarations)
+         std::cout<< pd->to_string() << "\n";
+   }
+
    parser::clean_up(pars);
 }
