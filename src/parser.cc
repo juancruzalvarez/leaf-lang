@@ -118,65 +118,74 @@ namespace parser
 
    ast::Module *parse_module(Parser &pars)
    {
-      ast::Module* mod = new ast::Module();
-      ast::Declaration* current_declaration;
-      Token tok;
 
       if(!consume(pars, MODULE, "Expected module."))
          return nullptr;
 
-      if(!match(pars, IDENTIFIER, tok)){
+      ast::Module* mod = new ast::Module{};
+      ast::Declaration* current_declaration;
+      Token tok;
+
+      if(!match(pars, IDENTIFIER, tok)) {
          add_error(pars, "Expected module name.");
          return nullptr;
       }
       mod->name = tok.val;
       if(!consume(pars, LBRACE, "Expected {."))
          return nullptr;
+      if(match(pars, IMPORT, tok)) {
+         consume(pars, LBRACE, "Expected { before import list.");
+         mod->imports = parse_list<std::string>(pars, COMMA, [](Parser &pars) -> std::string {return advance(pars).val;});
+         consume(pars, RBRACE, "Expected } .");
+      }
 
-      auto current_list = mod->private_declarations;
-      while(peek(pars).type == PUBLIC || peek(pars).type == PRIVATE)
+      ast::ParsedDeclarations *private_declarations = new ast::ParsedDeclarations{},
+       *public_declarations = new ast::ParsedDeclarations{};
+      auto current_list = private_declarations;
+      while(match(pars, {PUBLIC, PRIVATE}, tok))
       {
-         if(advance(pars).type == PUBLIC)
-            current_list = mod->public_declarations;
-         else
-            current_list = mod->private_declarations;
+         current_list = tok.type == PUBLIC ?
+                        public_declarations:
+                        private_declarations;
 
          if(!consume(pars, COLON, "expected :."))
             return nullptr;
 
          tok = peek(pars);
-         while(tok.type == FN || tok.type == CONST || tok.type == TYPE ||tok.type == CLASS){
+         while(match(pars, {FN, TYPE, CLASS, CONST}, tok))
+         {
+            unget(pars, tok);
             current_declaration = parse_declaration(pars);
             switch(current_declaration->get_kind()){
                case ast::DECLARATION_TYPE:{
                   auto type_dec = dynamic_cast<ast::TypeDeclaration*>(current_declaration);
                   auto type = type_dec->type;
                   if(type->get_kind() == ast::TYPE_SIMPLE){
-                     current_list.type_aliases.push_back(type_dec);
+                     current_list->type_aliases.push_back(type_dec);
                   }else{
-                     current_list.types.push_back(type_dec);
+                     current_list->types.push_back(type_dec);
                   }
                   break;
                }
                case ast::DECLARATION_FN:{
                   auto fn_dec = dynamic_cast<ast::FunctionDeclaration*>(current_declaration);
                   if(fn_dec->is_method){
-                     current_list.methods.push_back(fn_dec);
+                     current_list->methods.push_back(fn_dec);
                   }else{
-                     current_list.functions.push_back(fn_dec);
+                     current_list->functions.push_back(fn_dec);
                   }
                   break;
                }
                case ast::DECLARATION_TYPE_CLASS:{
-                  current_list.type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
+                  current_list->type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
                   break;
                }
                case ast::DECLARATION_CONST:{
-                  current_list.consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
+                  current_list->consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
                   break;
                }
                case ast::DECLARATION_CONST_SET:{
-                  current_list.const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
+                  current_list->const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
                   break;
                }
                default:{
@@ -186,13 +195,14 @@ namespace parser
                }
 
             }
-
+            consume(pars, SEMICOLON, "Unexpected token, expected ; after declaration.");
          }
-     
-         consume(pars, SEMICOLON, "Unexpected token, expected ;.");
       }
       consume(pars, RBRACE, "Expected }.");
-   
+
+      mod->private_declarations = private_declarations;
+      mod->public_declarations = public_declarations;
+      return mod;
    }
 
 
@@ -207,9 +217,9 @@ namespace parser
       case CLASS:
          return parse_type_class_declaration(pars);
       case CONST:
-         std::cout<<"HELLU!"<<"\n";
          return parse_const_declaration(pars);
       default:
+         add_error(pars, "Unexpected start of declaration, Expected FN, TYPE, CLASS or CONST.");
          return new ast::InvalidDeclaration{};
       }
    }
@@ -878,7 +888,7 @@ namespace parser
    {
       ast::Exp *lhs = parse_ternary(pars);
       Token tok;
-      if (match(pars, {ASSIGN, ADD_ASSIGN, OR_ASSIGN, AND_ASSIGN, SUB_ASSIGN, XOR_ASSIGN, MOD_ASSIGN}, tok))
+      if (match(pars, {ASSIGN, ADD_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, OR_ASSIGN, AND_ASSIGN, SUB_ASSIGN, XOR_ASSIGN, MOD_ASSIGN}, tok))
       {
          lhs = new ast::BinaryExp{operators::get_binary_operator(tok.type), lhs, parse_assignment(pars)};
       }
@@ -1104,17 +1114,11 @@ namespace parser
    {
       std::vector<T> list{};
       Token tok;
-      std::cout<<"parse_list:";
-      std::cout<<"start pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
       do
       {
-         std::cout<<"in loop: start pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
          list.push_back(parse_func(pars));
-         std::cout<<"in loop: end pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
-
 
       } while (match(pars, separator, tok));
-      std::cout<<"end pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
 
       return list;
    }

@@ -1,23 +1,64 @@
-module math {
+module Math
+{
+   
+import {
+   Tests,
+   Math,
+   Drive
+}
+
+
 public:
 
-   type Vec2 :: struct {
-      x, y :: f32;
+   const F32_PI = 3.141591;
+   const PI     = 3.141591;
+   const ID     = {1.0, 1.0};
+   const ZERO   = {0.0, 0.0};
+   const ARR    = [0, 1, 2, 3, 4, 5];
+
+   const ANGLE_TYPES {
+      RIGHT_ANGLE,
+      ACUTE_ANGLE,
+      OBTUSE_ANGLE
    };
 
-   fn (a :: Vec2) add (b :: Vec2) -> Vec2 {
-      return { a.x + b.x, a.y + b.y };
+   type Vec3 :: struct {
+      x, y :: f64;
    };
 
-   fn (a :: Vec2) sub (b :: Vec2) -> Vec2 => Vec2{ a.x - b.x, a.y - b.y };
-   fn (a :: Vec2) mult (b :: Vec2) -> Vec2 => Vec2{ a.x * b.x, a.y * b.y };
-   fn (a :: Vec2) div (b :: Vec2) -> Vec2 => Vec2{ a.x / b.x, a.y / b.y };
+   fn (a :: vec3*) add(b :: vec3) {
+      a.x += b.x;
+      a.y += b.y;
+   };
 
-   fn (a :: Vec2) mult_scalar (b :: f32) -> Vec2 => Vec2{ a.x * b, a.y * b };
+   fn dot(a, b :: vec3) -> f64 {
+      return a.x*b.x + a.y*b.y;
+   };
+
+   fn cross(a, b :: vec3) -> vec3 {
+      aux := 0.0;
+      for i := 0; i<32; ++i {
+         aux += a.x*b.x;
+      }
+      return aux;
+   };
 
 
 private:
-   fn dot (a, b :: Vec2) -> f32 => a.x*b.x + a.y*b.y;
-   fn dist(a, b :: Vec2) -> f32 => math.Sqrt( (a.x-b.x)**2 + (a.y-b.y)**2 );
+
+   fn abs(x :: int) -> int => x > 0 ? x : -x;
+
+   fn max(x, y :: int) -> int => x > y ? x : y;
+
+   fn pow(x :: f32, n :: u32) -> f32 {
+      res := 1.0;
+      i := abs(n);
+      while i >= 0 {
+         res *= x;
+         i--;
+      }
+
+      return n > 0 ? res : (1 / res) ;
+   } 
 
 }

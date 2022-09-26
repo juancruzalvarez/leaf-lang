@@ -49,7 +49,7 @@ namespace ast
    public:
       SimpleType(std::string val) : val(val){};
       TypeKind get_kind() override { return TYPE_SIMPLE; }
-      virtual std::string to_string()
+      std::string to_string() override
       {
          std::string res = is_const ? "const " : "";
          res += is_pointer ? "ptr " : "";
@@ -130,7 +130,7 @@ namespace ast
    class BadType : public Type
    {
       TypeKind get_kind() override { return TYPE_INVALID; }
-      virtual std::string to_string() { return "Bad Type"; }
+      std::string to_string() override { return "Bad Type"; }
    };
 
    enum TraitType{
@@ -148,16 +148,17 @@ namespace ast
    class MemberTrait : public Trait{
    public:
       MemberTrait(std::string name, ast::Type* type):name(name), type(type){}
-      std::string to_string() override{return "name: "+name+" type: "+type->to_string();}
-      virtual TraitType get_type(){return TRAIT_MEMBER;}
+      std::string to_string() override {return "name: "+name+" type: "+type->to_string();}
+      TraitType get_type() override {return TRAIT_MEMBER;}
       std::string name;
-       ast::Type* type;
+      ast::Type* type;
    };
 
    class MethodTrait : public Trait{
    public:
       MethodTrait(std::string name, std::vector<ast::Type*> args, ast::Type* return_type): name(name), args(args),return_type(return_type){}
-      std::string to_string() override{
+      TraitType get_type() override {return TRAIT_METHOD;}
+      std::string to_string() override {
          std::string ret =  "Method :: \nname: "+name+"\nArgs:\n";
          for(const auto& arg : args){
             ret+= arg->to_string() +"\n";
@@ -170,7 +171,7 @@ namespace ast
       ast::Type* return_type;
    };
 
-   class TypeClass{
+   class TypeClass {
    public:
       std::string type_var;
       std::vector<std::string>is;

@@ -2,10 +2,11 @@ module Math
 {
    
 import {
-   "Tests",
-   "Math",
-   "Drive"
+   Tests,
+   Math,
+   Drive
 }
+
 
 public:
 
@@ -18,30 +19,44 @@ public:
       OBTUSE_ANGLE
    };
 
-   type Vec3 :: struct
-   {
+   type Vec3 :: struct {
       x, y :: f64;
    };
 
-   fn (a :: vec3*) add(b :: vec3) 
-   {
+   fn (a :: vec3*) add(b :: vec3) {
       a.x += b.x;
       a.y += b.y;
    };
 
-   fn dot(a, b :: vec3) -> f64
-   {
+   fn dot(a, b :: vec3) -> f64 {
       return a.x*b.x + a.y*b.y;
    };
 
-   fn cross(a, b :: vec3) -> vec3
-   {
-
+   fn cross(a, b :: vec3) -> vec3 {
+      aux := 0.0;
+      for i := 0; i<32; ++i {
+         aux += a.x*b.x;
+      }
+      return aux;
    };
 
 
 private:
 
+   fn abs(x :: int) -> int => x > 0 ? x : -x;
+
+   fn max(x, y :: int) -> int => x > y ? x : y;
+
+   fn pow(x :: f32, n :: u32) -> f32 {
+      res := 1.0;
+      i := abs(n);
+      while i >= 0 {
+         res *= x;
+         i--;
+      }
+
+      return n > 0 ? res : (1 / res) ;
+   } 
 
 }
 
