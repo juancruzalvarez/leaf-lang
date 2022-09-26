@@ -23,6 +23,7 @@ namespace ast
    public:
       virtual DeclarationKind get_kind() { return DECLARATION_INVALID; };
       virtual std::string to_string() { return "invalid_dec"; };
+      virtual void gen_code(code_gen::Context contex){};
    };
 
    class InvalidDeclaration : public Declaration
@@ -117,6 +118,10 @@ namespace ast
          std::cout<<"HELLO!\n";
          return DECLARATION_CONST;
       };
+
+      void gen_code(code_gen::Context contex) override {
+         
+      }
    };
 
    class ConstSetDeclaration : public Declaration
