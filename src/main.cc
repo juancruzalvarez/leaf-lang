@@ -18,7 +18,6 @@ int main(){
          std::cout<<err.msg<<"\n";
       }
    }
-<<<<<<< HEAD
       std::cout<<"Parsed with no errors!\n";
       std::cout<<"Parsed file:\n";
 
@@ -101,8 +100,6 @@ int main(){
          }
 
       }
-=======
->>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
    
    for(const auto& mod : parsed.modules) {
       std::cout<< "Module " << mod->name  << "\n";

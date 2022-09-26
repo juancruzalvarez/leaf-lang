@@ -121,7 +121,6 @@ namespace parser
 
    ast::Module *parse_module(Parser &pars)
    {
-<<<<<<< HEAD
 
       if(!consume(pars, MODULE, "Expected module."))
          return nullptr;
@@ -132,16 +131,6 @@ namespace parser
 
       if(!match(pars, IDENTIFIER, tok)) {
          add_error(pars, "Expected module name.");
-=======
-      ast::Module* mod;
-      Token tok;
-      
-      if(!consume(pars, MODULE, "Unexpected token, expected 'module'."))
-         return nullptr;
-      
-      if(!match(pars, IDENTIFIER, tok)) {
-         add_error(pars, "Unexpected token, expected identifier (Module name)");
->>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
          return nullptr;
       }
 
@@ -155,7 +144,6 @@ namespace parser
          consume(pars, RBRACE, "Expected } .");
       }
 
-<<<<<<< HEAD
       ast::ParsedDeclarations *private_declarations = new ast::ParsedDeclarations{},
        *public_declarations = new ast::ParsedDeclarations{};
       auto current_list = private_declarations;
@@ -219,28 +207,6 @@ namespace parser
 
       mod->private_declarations = private_declarations;
       mod->public_declarations = public_declarations;
-=======
-      std::vector<ast::Declaration*> private_list, public_list;
-      std::vector<ast::Declaration*> current_list;
-      while(match(pars, {PUBLIC, PRIVATE}, tok)) {
-         std::cout<<"private public"<<"\n";
-         current_list = tok.type == PUBLIC ? public_list : private_list;
-         consume(pars, COLON, "Expected ':' following public or private.");
-         while(match(pars, {FN, CONST, TYPE, CLASS}, tok)) {
-            std::cout<<"FNCONSTTYPECLASS"<<"\n";
-            unget(pars, tok);
-            current_list.push_back(parse_declaration(pars));
-            consume(pars, SEMICOLON, "Expected ';' after declaration.");
-         }
-      }
-
-
-      if(!consume(pars, RBRACE, "Unexpected token, expected '{'."))
-         add_error(pars, "Missing closing '}' in module declaration.");
-
-      mod->private_declarations = private_list;
-      mod->public_declarations = public_list;
->>>>>>> ebcf0cc7b3ef353e545f6fa7a5013b4727c7d2e0
       return mod;
    }
 
