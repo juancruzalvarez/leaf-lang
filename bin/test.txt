@@ -31,6 +31,10 @@ public:
       c, d, e :: struct { x, y :: f32;};
    };
 
+   type newNum :: Num;
+   type Vec :: Vec3;
+
+
    type FnTYpe :: fn (i32, i32) -> f64;
 
    fn (a :: vec3*) add(b :: vec3) {

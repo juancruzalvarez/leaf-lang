@@ -80,7 +80,22 @@ namespace ast
          return ret;
       };
       
-     
+      void gen_code(code_gen::Context &context) override 
+      {
+         std::string vis = (visibility == VISIBILITY_PRIVATE) ? "private ":"";
+         std::string code = "define " + vis +
+           return_type->to_llmv_type(context) + " @" + name + "(";
+         for(const auto& arg : args)
+         {
+            code += arg->type->to_llmv_type(context) + " %" + arg->name+", ";
+         }
+         code.pop_back();
+         code.pop_back();
+         code += ") nounwind {";
+         code_gen::add_line(context, code);
+         body->gen_code(context);
+         code_gen::add_line(context, "}");
+      }
 
       std::string name;
       std::vector<std::string> template_vars;
@@ -98,9 +113,9 @@ namespace ast
       TypeDeclaration(std::string name, ast::Type *type) : name(name), type(type){};
       DeclarationKind get_kind() override { return DECLARATION_TYPE; };
       std::string to_string() override { return "Name: " + name + "\nType: " + type->to_string(); };
-      void gen_code(code_gen::Context &contex) override 
+      void gen_code(code_gen::Context &context) override 
       {
-         code_gen::add_line(contex, "%"+name+" ="+type->to_llmv_type());
+         code_gen::add_line(context, "%"+name+" = "+type->to_llmv_type(context));
       };
 
       std::string name;

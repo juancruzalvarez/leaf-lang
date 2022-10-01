@@ -4,6 +4,7 @@
 #include <vector>
 #include "expression.hh"
 #include <iostream>
+#include "code_generation.hh"
 
 namespace ast
 {
@@ -21,7 +22,7 @@ namespace ast
    public:
       virtual TypeKind get_kind() { return TYPE_INVALID; };
       virtual std::string to_string() { return "invalid_type"; }
-      virtual std::string to_llmv_type() { return "invalid_type";};
+      virtual std::string to_llmv_type(code_gen::Context &context) { return "invalid_type";};
       bool is_pointer = false, is_const = false;
    };
  
@@ -57,12 +58,17 @@ namespace ast
          res += val;
          return res;
       }
-      std::string to_llmv_type() override 
+      std::string to_llmv_type(code_gen::Context &context) override 
       {
          if (is_pointer)
             return "ptr";
          else
-            return "%"+val;
+         {
+            if(context.resolved_types.count("%"+val) != 0)
+               return context.resolved_types.at("%"+val);
+            else
+               return "%"+val;
+         }
       }
       std::string val;
    };
@@ -87,10 +93,10 @@ namespace ast
          return res;
       }
 
-      std::string to_llmv_type() override {
+      std::string to_llmv_type(code_gen::Context &context) override {
          std::string llmv_type = "type {";
          for(const auto& v : vars){
-            llmv_type += v->type->to_llmv_type() + ", ";
+            llmv_type += v->type->to_llmv_type(context) + ", ";
          }
          llmv_type.pop_back();
          llmv_type.pop_back();
@@ -123,14 +129,14 @@ namespace ast
          return res;
       }
 
-      std::string to_llmv_type() override 
+      std::string to_llmv_type(code_gen::Context &context) override 
       {
          if(is_pointer)
             return "ptr";
-         std::string llmv_type = return_type->to_llmv_type() + " (";
+         std::string llmv_type = return_type->to_llmv_type(context) + " (";
          for (const auto arg : args)
          {
-            llmv_type += arg->to_llmv_type() + ", ";
+            llmv_type += arg->to_llmv_type(context) + ", ";
          }
          llmv_type.pop_back();
          llmv_type.pop_back();

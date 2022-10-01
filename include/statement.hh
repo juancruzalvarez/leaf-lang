@@ -26,6 +26,7 @@ namespace ast
    public:
       virtual StatementKind get_kind() { return STATEMENT_INVALID; };
       virtual std::string to_string() { return "invalid_statement"; };
+      virtual std::string gen_code(code_gen::Context& context){return "";};
    };
 
    class SimpleStatement : public Statement {
