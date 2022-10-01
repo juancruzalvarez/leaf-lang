@@ -144,14 +144,9 @@ namespace parser
          consume(pars, RBRACE, "Expected } .");
       }
 
-      ast::ParsedDeclarations *private_declarations = new ast::ParsedDeclarations{},
-       *public_declarations = new ast::ParsedDeclarations{};
-      auto current_list = private_declarations;
+      ast::ParsedDeclarations *declarations = new ast::ParsedDeclarations{};
       while(match(pars, {PUBLIC, PRIVATE}, tok))
       {
-         current_list = tok.type == PUBLIC ?
-                        public_declarations:
-                        private_declarations;
 
          if(!consume(pars, COLON, "expected :."))
             return nullptr;
@@ -166,35 +161,34 @@ namespace parser
                   auto type_dec = dynamic_cast<ast::TypeDeclaration*>(current_declaration);
                   auto type = type_dec->type;
                   if(type->get_kind() == ast::TYPE_SIMPLE){
-                     current_list->type_aliases.push_back(type_dec);
+                     declarations->type_aliases.push_back(type_dec);
                   }else{
-                     current_list->types.push_back(type_dec);
+                     declarations->types.push_back(type_dec);
                   }
                   break;
                }
                case ast::DECLARATION_FN:{
                   auto fn_dec = dynamic_cast<ast::FunctionDeclaration*>(current_declaration);
                   if(fn_dec->is_method){
-                     current_list->methods.push_back(fn_dec);
+                     declarations->methods.push_back(fn_dec);
                   }else{
-                     current_list->functions.push_back(fn_dec);
+                     declarations->functions.push_back(fn_dec);
                   }
                   break;
                }
                case ast::DECLARATION_TYPE_CLASS:{
-                  current_list->type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
+                  declarations->type_classes.push_back(dynamic_cast<ast::TypeClassDeclaration*>(current_declaration));
                   break;
                }
                case ast::DECLARATION_CONST:{
-                  current_list->consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
+                  declarations->consts.push_back(dynamic_cast<ast::ConstDeclaration*>(current_declaration));
                   break;
                }
                case ast::DECLARATION_CONST_SET:{
-                  current_list->const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
+                  declarations->const_sets.push_back(dynamic_cast<ast::ConstSetDeclaration*>(current_declaration));
                   break;
                }
                default:{
-                  std::cout<<"type:"<<current_declaration->to_string()<<"\n";
                   add_error(pars, "unexpected declaration type!");
                   return nullptr;
                }
@@ -205,8 +199,7 @@ namespace parser
       }
       consume(pars, RBRACE, "Expected }.");
 
-      mod->private_declarations = private_declarations;
-      mod->public_declarations = public_declarations;
+      mod->declarations = declarations;
       return mod;
    }
 
@@ -377,15 +370,12 @@ namespace parser
          return new ast::InvalidDeclaration{};
       }
       name = tok.val;
-      std::cout<<"Name: "+ name <<"\n";
 
 
       if (match(pars, LBRACE, tok)){
-         std::cout<<"LBRACE!"<<"\n";
          auto values = parse_list<ast::Declaration*>(pars, COMMA, parse_const);
          consume(pars, RBRACE, "Unexpected token, expected }.");
          ast::Declaration* a = new ast::ConstSetDeclaration{name, values};
-         std::cout<<"a:"<<a->to_string()<<"\n";
          return a;
       }else{
          ast::Type* type;
@@ -404,15 +394,12 @@ namespace parser
             value = new ast::EmptyExp{};
          }
          auto a = new ast::ConstDeclaration{name, type, value};
-         std::cout<<"a:"<<a->to_string()<<"\n";
          return a;
       }
    }
 
    ast::Statement *parse_statement(Parser &pars)
    {
-      std::cout<<"Parse statement:\n";
-      std::cout<<"STATEMENT START pos:"<<peek(pars).pos.line<< "::"<<peek(pars).pos.line_offset<<"\n";
 
       switch (peek(pars).type)
       {
@@ -560,14 +547,8 @@ namespace parser
       }
       else
       {
-         std::cout<<"nexttt:"<<type_to_str(peek(pars).type)<<"\n";
          after = parse_list<ast::Statement*>(pars, COMMA, parse_statement);
       }
-      std::cout<<"after:\n";
-      for(const auto& af :after){
-         std::cout<<"af:"<<af->to_string()<<"\n";
-      }
-      std::cout<<"next:"<<type_to_str(peek(pars).type)<<"\n";
       statement = parse_block_statement(pars);
 
       return new ast::ForStatement{condition, before, after, statement};
@@ -825,7 +806,6 @@ namespace parser
       // NOTE: this makes semicolons not optional in struct type.
       while (peek(pars).type != RBRACE)
       {
-         std::cout << "Hola hola\n";
          auto vec = parse_var_declaration(pars);
          consume(pars, SEMICOLON, "Unexpected token, expected ;.");
          vars.insert(vars.end(), vec.begin(), vec.end());

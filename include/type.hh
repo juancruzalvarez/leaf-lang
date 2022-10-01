@@ -135,6 +135,7 @@ namespace ast
          llmv_type.pop_back();
          llmv_type.pop_back();
          llmv_type+= ')';
+         return llmv_type;
       }
 
       std::vector<std::string> template_vars;

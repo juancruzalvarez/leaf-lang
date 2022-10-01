@@ -1,7 +1,11 @@
 #ifndef CODE_GENERATION_H
 #define CODE_GENERATION_H
+
+#include <vector>
 #include <string>
 #include <map>
+
+
 
 namespace code_gen{
    
@@ -14,6 +18,7 @@ namespace code_gen{
       std::string type;
       std::string name;
    };
+
 
    void add_line(Context &context, std::string line);
 }

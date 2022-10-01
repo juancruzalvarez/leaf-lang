@@ -8,6 +8,7 @@ namespace type_check{
         }
         
     }
+    
 
     std::string get_literal_type(ast::LiteralExp* lit){
         switch(lit->type){

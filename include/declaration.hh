@@ -18,12 +18,20 @@ namespace ast
       DECLARATION_CONST_SET,
       DECLARATION_TYPE_CLASS,
    };
+
+   enum DeclarationVisibility
+   {
+      VISIBILITY_PUBLIC,
+      VISIBILITY_PRIVATE
+   };
+
    class Declaration
    {
    public:
+      DeclarationVisibility visibility;
       virtual DeclarationKind get_kind() { return DECLARATION_INVALID; };
       virtual std::string to_string() { return "invalid_dec"; };
-      virtual void gen_code(code_gen::Context contex){};
+      virtual void gen_code(code_gen::Context &contex){};
    };
 
    class InvalidDeclaration : public Declaration
@@ -90,9 +98,9 @@ namespace ast
       TypeDeclaration(std::string name, ast::Type *type) : name(name), type(type){};
       DeclarationKind get_kind() override { return DECLARATION_TYPE; };
       std::string to_string() override { return "Name: " + name + "\nType: " + type->to_string(); };
-      void gen_code(code_gen::Context contex) override 
+      void gen_code(code_gen::Context &contex) override 
       {
-         
+         code_gen::add_line(contex, "%"+name+" ="+type->to_llmv_type());
       };
 
       std::string name;
@@ -120,11 +128,10 @@ namespace ast
          return "const: "+ name + " \ntype:" + type->to_string() + " \nval:" + val->to_string();
       };
       DeclarationKind get_kind() override {
-         std::cout<<"HELLO!\n";
          return DECLARATION_CONST;
       };
 
-      void gen_code(code_gen::Context contex) override {
+      void gen_code(code_gen::Context &contex) override {
          
       }
    };
@@ -145,7 +152,6 @@ namespace ast
          return ret; 
       };
       DeclarationKind get_kind() override {
-                  std::cout<<"HELLO!\n";
 
          return DECLARATION_CONST_SET;
       };
