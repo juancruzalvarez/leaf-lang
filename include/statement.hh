@@ -164,7 +164,7 @@ namespace ast
 
          int condition_label = ssa_id++, body_label = ssa_id++, end_label = ssa_id++;
          code_gen::add_line(context, std::to_string(condition_label) + ":");
-         code_gen::Value condition_value = condition->code_gen(context, ssa_id);
+         code_gen::Value condition_value = condition->gen_code(context, ssa_id);
          code_gen::add_line(context, 
             "br i1 " + condition_value.name + 
             ", label %" + std::to_string(body_label) + 
@@ -203,7 +203,19 @@ namespace ast
       {
          for(const auto& s : before)
             s->gen_code(context, ssa_id);
-         
+         int condition_label = ssa_id++, body_label = ssa_id++, end_label = ssa_id++;
+         code_gen::add_line(context, std::to_string(condition_label) + ":");
+         code_gen::Value condition_value = condition->gen_code(context, ssa_id);
+         code_gen::add_line(context, 
+            "br i1 " + condition_value.name + 
+            ", label %" + std::to_string(body_label) + 
+            ", %" + std::to_string(end_label));
+         code_gen::add_line(context, std::to_string(body_label) + ":");
+         statement->gen_code(context, ssa_id);
+         for(const auto& s : after)
+            s->gen_code(context, ssa_id);
+         code_gen::add_line(context, "br label %"+std::to_string(condition_label));
+         code_gen::add_line(context, std::to_string(end_label) + ":");
       }
    };
 
@@ -222,6 +234,15 @@ namespace ast
       };
       BlockStatement(std::vector<ast::Statement *> statements) : statements(statements){};
       std::vector<ast::Statement *> statements;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         int n = context.named_values.size();
+         for(const auto& s:statements)
+            s->gen_code(context, ssa_id);
+         while(context.named_values.size()>n)
+            context.named_values.pop_back();
+      }
+
    };
 
 };

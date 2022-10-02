@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "operator.hh"
-
+#include "code_generation.hh"
 
 
 namespace ast
@@ -32,6 +32,11 @@ namespace ast
    public:
       virtual ExpType get_type(){return ExpType::EXP_INVALID;};
       virtual std::string to_string(){return "invalid_expression";};
+      virtual code_gen::Value gen_code(code_gen::Context &context, int &ssa_id)
+      {
+         code_gen::add_line(context, "%"+std::to_string(ssa_id)+" = 0");
+         return {std::to_string(ssa_id++), std::string{"i32"}};
+      };
    };
 
    class BinaryExp : public Exp
