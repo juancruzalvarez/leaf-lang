@@ -26,7 +26,7 @@ namespace ast
    public:
       virtual StatementKind get_kind() { return STATEMENT_INVALID; };
       virtual std::string to_string() { return "invalid_statement"; };
-      virtual std::string gen_code(code_gen::Context& context){return "";};
+      virtual void gen_code(code_gen::Context& context, int &ssa_id){};
    };
 
    class SimpleStatement : public Statement {
@@ -35,7 +35,7 @@ namespace ast
       StatementKind kind;
       std::string to_string() override{
          switch (kind)
-         {
+         { 
             case STATEMENT_BREAK: return "Break Statement.";
             case STATEMENT_CONTINUE: return "Continue Statement.";
             case STATEMENT_EMPTY: return "Empty Statement.";
@@ -50,9 +50,14 @@ namespace ast
    class ReturnStatement : public Statement{
    public:
       StatementKind get_kind() override {return STATEMENT_RETURN;};
-      std::string to_string() override {return "Return : " + expression->to_string();};
-      ReturnStatement(ast::Exp* expression):expression(expression){};
-      ast::Exp* expression;
+      std::string to_string() override {return "Return : " + exp->to_string();};
+      ReturnStatement(ast::Exp* exp): exp(exp){};
+      ast::Exp* exp;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         code_gen::Value v = exp->gen_code(context, ssa_id);
+         code_gen::add_line(context, "ret " + v.type + " " + v.name);
+      };
    };
 
    class ExpressionStatement : public Statement
@@ -62,6 +67,10 @@ namespace ast
       std::string to_string() override { return exp->to_string(); };
       ExpressionStatement(ast::Exp *exp) : exp(exp){};
       ast::Exp *exp;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         exp->gen_code(context, ssa_id);
+      };
    };
 
    class VarDeclarationStatement : public Statement
@@ -79,6 +88,22 @@ namespace ast
       };
       VarDeclarationStatement(std::vector<ast::VariableDeclaration *> vars) : vars(vars){};
       std::vector<ast::VariableDeclaration *> vars;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         code_gen::Value init;
+         for(const auto& vd : vars)
+         {
+            std::string vd_name = vd->name;
+            std::string vd_llmv_type = vd->type->to_llmv_type(context);
+            context.named_values.push_back({"%"+vd_name, vd_llmv_type});
+            code_gen::add_line(context, "%"+vd_name+" = alloca " + vd_llmv_type);
+            if(vd->initialized) {
+               init = vd->initial_val->gen_code(context, ssa_id);
+               code_gen::add_line(context, "store " + vd_llmv_type+" "+init.name + ", ptr %"+vd_name);
+            }
+            
+         }
+      };
    };
 
    class IfStatement : public Statement
@@ -98,6 +123,22 @@ namespace ast
       ast::Exp *condition;
       ast::Statement *true_branch;
       ast::Statement *false_branch;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         int true_tag = ssa_id++, false_tag = ssa_id++, end_tag = ssa_id++;
+         code_gen::Value condition_value = condition->gen_code(context, ssa_id);
+         code_gen::add_line(context, 
+            "br i1 " + condition_value.name + 
+            ", label %" + std::to_string(true_tag) + 
+            ", %" + std::to_string(false_tag));
+         code_gen::add_line(context, std::to_string(true_tag) + ":");
+         true_branch->gen_code(context, ssa_id);
+         code_gen::add_line(context, "br label %" + std::to_string(end_tag));
+         code_gen::add_line(context, std::to_string(false_tag) + ":");
+         false_branch->gen_code(context, ssa_id);
+         code_gen::add_line(context, "br label %" + std::to_string(end_tag));
+         code_gen::add_line(context, std::to_string(end_tag) + ":");
+      };
    };
 
    class WhileStatement : public Statement
@@ -116,6 +157,23 @@ namespace ast
       ast::Exp *condition;
       ast::Statement *statement;
       bool is_do_while;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         if(is_do_while)
+            statement->gen_code(context, ssa_id);
+
+         int condition_label = ssa_id++, body_label = ssa_id++, end_label = ssa_id++;
+         code_gen::add_line(context, std::to_string(condition_label) + ":");
+         code_gen::Value condition_value = condition->code_gen(context, ssa_id);
+         code_gen::add_line(context, 
+            "br i1 " + condition_value.name + 
+            ", label %" + std::to_string(body_label) + 
+            ", %" + std::to_string(end_label));
+         code_gen::add_line(context, std::to_string(body_label) + ":");
+         statement->gen_code(context, ssa_id);
+         code_gen::add_line(context, "br label %"+std::to_string(condition_label));
+         code_gen::add_line(context, std::to_string(end_label) + ":");
+      }
    };
 
    class ForStatement : public Statement
@@ -141,6 +199,12 @@ namespace ast
       ast::Exp *condition;
       std::vector<ast::Statement *>before, after;
       ast::Statement *statement;
+      void gen_code(code_gen::Context& context, int &ssa_id) override
+      {
+         for(const auto& s : before)
+            s->gen_code(context, ssa_id);
+         
+      }
    };
 
    class BlockStatement : public Statement

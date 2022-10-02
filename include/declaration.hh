@@ -82,19 +82,26 @@ namespace ast
       
       void gen_code(code_gen::Context &context) override 
       {
+         int start_stack_size = context.named_values.size();
+         int ssa_id = 0;
          std::string vis = (visibility == VISIBILITY_PRIVATE) ? "private ":"";
          std::string code = "define " + vis +
            return_type->to_llmv_type(context) + " @" + name + "(";
          for(const auto& arg : args)
          {
-            code += arg->type->to_llmv_type(context) + " %" + arg->name+", ";
+            std::string arg_name = arg->name, arg_type = arg->type->to_llmv_type(context);
+            code += arg_type + " %" + arg_name+", ";
+            context.named_values.push_back({arg_name, arg_type});
          }
-         code.pop_back();
-         code.pop_back();
+         code.pop_back();  //remove extra ' '
+         code.pop_back();  //remove extra ','
          code += ") nounwind {";
          code_gen::add_line(context, code);
-         body->gen_code(context);
+         body->gen_code(context, ssa_id);
          code_gen::add_line(context, "}");
+
+         while(context.named_values.size() > start_stack_size)
+            context.named_values.pop_back();
       }
 
       std::string name;
