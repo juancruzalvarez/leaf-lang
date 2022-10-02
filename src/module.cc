@@ -44,7 +44,7 @@ namespace ast {
 
 
       //const declarations
-
+      //add values to named values!
 
       //type declarations
       for(const auto& td : module->declarations->types)

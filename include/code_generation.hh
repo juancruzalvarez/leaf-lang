@@ -11,6 +11,7 @@ namespace code_gen{
    
    struct Context{
       std::map<std::string, std::string> resolved_types;
+      std::vector<Value> named_values;
       std::vector<std::string> llmv_code;
    };
 
