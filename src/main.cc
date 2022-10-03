@@ -25,5 +25,10 @@ int main(){
    for(const auto& module : parsed.modules)
       ast::generate_code(code_gen_context, module);
    
+   std::ofstream out;
+   out.open("test.ll");
+   for(const auto& s : code_gen_context.llmv_code)
+      out<< s << "\n";
+   out.close();
    parser::clean_up(pars);
 }

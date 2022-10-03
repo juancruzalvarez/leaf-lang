@@ -35,7 +35,7 @@ namespace ast
       virtual code_gen::Value gen_code(code_gen::Context &context, int &ssa_id)
       {
          code_gen::add_line(context, "%"+std::to_string(ssa_id)+" = 0");
-         return {std::to_string(ssa_id++), std::string{"i32"}};
+         return {std::string{"i32"}, "%"+std::to_string(ssa_id++)};
       };
    };
 

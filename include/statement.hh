@@ -130,7 +130,7 @@ namespace ast
          code_gen::add_line(context, 
             "br i1 " + condition_value.name + 
             ", label %" + std::to_string(true_tag) + 
-            ", %" + std::to_string(false_tag));
+            ", label %" + std::to_string(false_tag));
          code_gen::add_line(context, std::to_string(true_tag) + ":");
          true_branch->gen_code(context, ssa_id);
          code_gen::add_line(context, "br label %" + std::to_string(end_tag));
@@ -168,7 +168,7 @@ namespace ast
          code_gen::add_line(context, 
             "br i1 " + condition_value.name + 
             ", label %" + std::to_string(body_label) + 
-            ", %" + std::to_string(end_label));
+            ", label %" + std::to_string(end_label));
          code_gen::add_line(context, std::to_string(body_label) + ":");
          statement->gen_code(context, ssa_id);
          code_gen::add_line(context, "br label %"+std::to_string(condition_label));
@@ -209,7 +209,7 @@ namespace ast
          code_gen::add_line(context, 
             "br i1 " + condition_value.name + 
             ", label %" + std::to_string(body_label) + 
-            ", %" + std::to_string(end_label));
+            ", label %" + std::to_string(end_label));
          code_gen::add_line(context, std::to_string(body_label) + ":");
          statement->gen_code(context, ssa_id);
          for(const auto& s : after)
